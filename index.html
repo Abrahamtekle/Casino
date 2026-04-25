@@ -312,6 +312,7 @@
 
   let totalPoints = 0, spinCount = 0;
   let bonusActive = null, pendingBonus = false;
+  let forcedDigit = -1; // when >= 0, all reels snap to this digit (guaranteed match)
 
   /* ── BUILD: put 3 digit divs per reel, we reposition them in JS ── */
   function buildReels() {
@@ -390,11 +391,22 @@
     reels[idx].spinning = false;
     cancelAnimationFrame(reels[idx].raf);
 
-    // Round top to nearest integer = nearest digit boundary
-    const snapped = Math.round(reels[idx].top);
-    const digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
+    let snapped, digit;
 
-    // Animate the last fraction smoothly with a quick CSS-like lerp
+    if (forcedDigit >= 0) {
+      // On every 5th spin: force all reels to the same (or paired) digit
+      // reel 0 and 1 always match; reel 2 matches too (all 3 same) for max reward
+      digit   = forcedDigit;
+      // find the nearest snapped value that gives this digit
+      const base = Math.round(reels[idx].top);
+      const baseDigit = ((base % DIGITS) + DIGITS) % DIGITS;
+      const diff = ((digit - baseDigit) + DIGITS) % DIGITS;
+      snapped = base + diff; // nudge forward to hit the forced digit
+    } else {
+      snapped = Math.round(reels[idx].top);
+      digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
+    }
+
     animateSnap(idx, reels[idx].top, snapped, digit);
   }
 
@@ -434,6 +446,13 @@
     document.getElementById('last-pts').textContent   = '—';
     document.getElementById('last-pts').style.color   = '';
 
+    // Every 5th spin: pick a random forced digit so reels guaranteed match
+    if (spinCount % 5 === 0) {
+      forcedDigit = Math.floor(Math.random() * DIGITS);
+    } else {
+      forcedDigit = -1;
+    }
+
     for (let i = 0; i < 3; i++) {
       document.getElementById('ind-' + i).classList.remove('stopped');
       document.getElementById('btn-stop-' + i).disabled = false;
@@ -462,6 +481,7 @@
 
     document.getElementById('btn-stop-all').disabled = true;
     document.getElementById('btn-start').disabled    = false;
+    forcedDigit = -1; // reset after results are read
 
     const vals    = reels.map(r => r.settled);
     const allSame = vals[0] === vals[1] && vals[1] === vals[2];
