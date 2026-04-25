@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Slot Machine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #f5c542;
+      --gold-dark: #c9972a;
+      --gold-light: #ffe99a;
+      --red: #d63031;
+      --green: #00b894;
+      --bg-deep: #0d0d0d;
+      --bg-mid: #1a1a1a;
+      --bg-panel: #222222;
+      --border: #3a3a3a;
+      --text: #f0e6cc;
+      --text-dim: #888;
+      --shadow: 0 0 40px rgba(245,197,66,0.12);
+    }
+
+    body {
+      background: var(--bg-deep);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* background grid pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,197,66,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,197,66,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .machine {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 48px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      width: 420px;
+    }
+
+    /* corner accents */
+    .machine::before, .machine::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: var(--gold);
+      border-style: solid;
+      opacity: 0.5;
+    }
+    .machine::before { top: 14px; left: 14px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+    .machine::after  { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+    .reels-container {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .reel-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reel-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .reel-window {
+      width: 90px;
+      height: 110px;
+      background: #111;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 4px 16px rgba(0,0,0,0.8);
+    }
+
+    /* top/bottom fade */
+    .reel-window::before,
+    .reel-window::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 28px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .reel-window::before { top: 0; background: linear-gradient(to bottom, #111, transparent); }
+    .reel-window::after  { bottom: 0; background: linear-gradient(to top, #111, transparent); }
+
+    /* center line */
+    .reel-line {
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: translateY(-50%);
+      z-index: 3;
+      opacity: 0.6;
+    }
+
+    .reel-track {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      will-change: transform;
+    }
+
+    .reel-digit {
+      width: 90px;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--text);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* divider between reels */
+    .reel-divider {
+      width: 1px;
+      height: 110px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    /* result strip */
+    .result-strip {
+      width: 100%;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .result-strip.spinning { color: #555; }
+    .result-strip.stopped  { color: var(--text-dim); }
+    .result-strip.win      { color: var(--gold); border-color: var(--gold); animation: pulse-border 1s ease-in-out infinite; }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,197,66,0); }
+      50%       { box-shadow: 0 0 12px 3px rgba(245,197,66,0.25); }
+    }
+
+    /* buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 12px 6px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-mid);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:not(:disabled):hover { filter: brightness(1.2); transform: translateY(-1px); }
+    .btn:not(:disabled):active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-start {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(0,184,148,0.08);
+    }
+    .btn-stop-single {
+      border-color: var(--gold-dark);
+      color: var(--gold);
+      background: rgba(245,197,66,0.06);
+    }
+    .btn-stop-all {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(214,48,49,0.08);
+    }
+
+    /* individual stop buttons row */
+    .stop-row {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .btn-stop-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-stop-col .btn {
+      width: 100%;
+    }
+
+    .stop-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .stop-indicator.stopped { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+
+    /* credit counter */
+    .credits-row {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .credit-box {
+      flex: 1;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .credit-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .credit-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* win flash overlay */
+    .win-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(245,197,66,0.06);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .win-flash.active { opacity: 1; animation: flash 0.6s ease-in-out 3; }
+    @keyframes flash { 0%,100% { opacity:0; } 50% { opacity:1; } }
+  </style>
+</head>
+<body>
+
+<div class="win-flash" id="win-flash"></div>
+
+<div class="machine">
+  <!-- Reels -->
+  <div class="reels-container">
+    <div class="reel-col">
+      <span class="reel-label">COL 1</span>
+      <div class="reel-window" id="win-0">
+        <div class="reel-line"></div>
+        <div class="reel-track" id="reel-0"></div>
+      </div>
+      <div class="stop-indicator" id="ind-0"></div>
+    </div>
+
+    <div class="reel-divider"></div>
+
+    <div class="reel-col">
+      <span class="reel-label">COL 2</span>
+      <div class="reel-window" id="win-1">
+        <div class="reel-line"></div>
+        <div class="reel-track" id="reel-1"></div>
+      </div>
+      <div class="stop-indicator" id="ind-1"></div>
+    </div>
+
+    <div class="reel-divider"></div>
+
+    <div class="reel-col">
+      <span class="reel-label">COL 3</span>
+      <div class="reel-window" id="win-2">
+        <div class="reel-line"></div>
+        <div class="reel-track" id="reel-2"></div>
+      </div>
+      <div class="stop-indicator" id="ind-2"></div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-strip" id="result">PRESS START</div>
+
+  <!-- Credits -->
+  <div class="credits-row">
+    <div class="credit-box">
+      <div class="credit-label">SPINS</div>
+      <div class="credit-value" id="spin-count">0</div>
+    </div>
+    <div class="credit-box">
+      <div class="credit-label">WINS</div>
+      <div class="credit-value" id="win-count">0</div>
+    </div>
+    <div class="credit-box">
+      <div class="credit-label">RESULT</div>
+      <div class="credit-value" id="last-result">—</div>
+    </div>
+  </div>
+
+  <!-- Individual stops -->
+  <div class="stop-row">
+    <div class="btn-stop-col">
+      <button class="btn btn-stop-single" id="btn-stop-0" onclick="stopReel(0)" disabled>STOP 1</button>
+    </div>
+    <div class="btn-stop-col">
+      <button class="btn btn-stop-single" id="btn-stop-1" onclick="stopReel(1)" disabled>STOP 2</button>
+    </div>
+    <div class="btn-stop-col">
+      <button class="btn btn-stop-single" id="btn-stop-2" onclick="stopReel(2)" disabled>STOP 3</button>
+    </div>
+  </div>
+
+  <!-- Main controls -->
+  <div class="btn-row">
+    <button class="btn btn-start" id="btn-start" onclick="startAll()">▶ START</button>
+    <button class="btn btn-stop-all" id="btn-stop-all" onclick="stopAll()" disabled>■ STOP ALL</button>
+  </div>
+</div>
+
+<script>
+  const NUM_DIGITS = 10;
+  const REEL_H = 110;
+
+  let state = [
+    { spinning: false, value: 0, offset: 0, raf: null },
+    { spinning: false, value: 0, offset: 0, raf: null },
+    { spinning: false, value: 0, offset: 0, raf: null },
+  ];
+
+  let spinCount = 0, winCount = 0;
+
+  function buildReels() {
+    for (let i = 0; i < 3; i++) {
+      const track = document.getElementById('reel-' + i);
+      track.innerHTML = '';
+      for (let d = 0; d < NUM_DIGITS * 3; d++) {
+        const el = document.createElement('div');
+        el.className = 'reel-digit';
+        el.textContent = d % NUM_DIGITS;
+        track.appendChild(el);
+      }
+      setPosition(i, 0);
+    }
+  }
+
+  function setPosition(idx, val) {
+    const track = document.getElementById('reel-' + idx);
+    track.style.transition = 'none';
+    track.style.transform = 'translateY(-' + (val * REEL_H) + 'px)';
+    state[idx].value = val;
+    state[idx].offset = val * REEL_H;
+  }
+
+  function startSpin(idx) {
+    state[idx].spinning = true;
+    state[idx].offset = state[idx].value * REEL_H;
+
+    const maxOffset = NUM_DIGITS * REEL_H * 2;
+
+    function tick() {
+      if (!state[idx].spinning) return;
+      state[idx].offset += 5;
+      if (state[idx].offset >= maxOffset) state[idx].offset -= NUM_DIGITS * REEL_H;
+
+      const track = document.getElementById('reel-' + idx);
+      track.style.transition = 'none';
+      track.style.transform = 'translateY(-' + state[idx].offset + 'px)';
+
+      state[idx].raf = requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  function stopReel(idx) {
+    if (!state[idx].spinning) return;
+    state[idx].spinning = false;
+    cancelAnimationFrame(state[idx].raf);
+
+    const rawPos = state[idx].offset;
+    let digit = Math.round(rawPos / REEL_H) % NUM_DIGITS;
+    if (digit < 0) digit += NUM_DIGITS;
+
+    const track = document.getElementById('reel-' + idx);
+    track.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+    track.style.transform = 'translateY(-' + (digit * REEL_H) + 'px)';
+    state[idx].value = digit;
+    state[idx].offset = digit * REEL_H;
+
+    document.getElementById('ind-' + idx).classList.add('stopped');
+    document.getElementById('btn-stop-' + idx).disabled = true;
+
+    checkDone();
+  }
+
+  function stopAll() {
+    for (let i = 0; i < 3; i++) stopReel(i);
+  }
+
+  function startAll() {
+    spinCount++;
+    document.getElementById('spin-count').textContent = spinCount;
+    document.getElementById('last-result').textContent = '—';
+
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('ind-' + i).classList.remove('stopped');
+      document.getElementById('btn-stop-' + i).disabled = false;
+    }
+
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-stop-all').disabled = false;
+
+    const res = document.getElementById('result');
+    res.textContent = 'SPINNING...';
+    res.className = 'result-strip spinning';
+
+    for (let i = 0; i < 3; i++) startSpin(i);
+  }
+
+  function checkDone() {
+    const allStopped = state.every(s => !s.spinning);
+    if (!allStopped) return;
+
+    document.getElementById('btn-stop-all').disabled = true;
+    document.getElementById('btn-start').disabled = false;
+
+    const vals = state.map(s => s.value);
+    const result = document.getElementById('result');
+    const lastRes = document.getElementById('last-result');
+
+    const allSame = vals.every(v => v === vals[0]);
+    const twoPairs = vals[0] === vals[1] || vals[1] === vals[2] || vals[0] === vals[2];
+
+    if (allSame) {
+      result.textContent = vals.join('  ·  ') + '  —  JACKPOT!';
+      result.className = 'result-strip win';
+      winCount++;
+      document.getElementById('win-count').textContent = winCount;
+      lastRes.textContent = 'WIN';
+      lastRes.style.color = 'var(--gold)';
+      document.getElementById('win-flash').classList.add('active');
+      setTimeout(() => document.getElementById('win-flash').classList.remove('active'), 2000);
+    } else if (twoPairs) {
+      result.textContent = vals.join('  ·  ') + '  —  PAIR!';
+      result.className = 'result-strip stopped';
+      lastRes.textContent = 'PAIR';
+      lastRes.style.color = 'var(--gold-dark)';
+    } else {
+      result.textContent = vals.join('  ·  ') + '  —  TRY AGAIN';
+      result.className = 'result-strip stopped';
+      lastRes.textContent = 'MISS';
+      lastRes.style.color = 'var(--text-dim)';
+    }
+  }
+
+  buildReels();
+</script>
+</body>
+</html>
