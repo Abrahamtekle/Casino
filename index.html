@@ -1,333 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Slot Machine</title>
+  <title>Slot Machine — Player 1</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --gold: #f5c542;
       --gold-dark: #c9972a;
-      --gold-light: #ffe99a;
       --red: #d63031;
       --green: #00b894;
       --bg-deep: #0d0d0d;
       --bg-mid: #1a1a1a;
-      --bg-panel: #222222;
+      --bg-panel: #1e1e1e;
       --border: #3a3a3a;
       --text: #f0e6cc;
-      --text-dim: #888;
-      --shadow: 0 0 40px rgba(245,197,66,0.12);
+      --text-dim: #777;
     }
-
     body {
       background: var(--bg-deep);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-family: 'Share Tech Mono', monospace;
       color: var(--text);
-      overflow: hidden;
     }
-
-    /* background grid pattern */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+      content: ''; position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(245,197,66,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,197,66,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
+        linear-gradient(rgba(245,197,66,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,197,66,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
     }
 
     .machine {
-      background: var(--bg-panel);
-      border: 1.5px solid var(--border);
-      border-radius: 24px;
-      padding: 40px 48px 36px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 28px;
-      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+      background: var(--bg-panel); border: 1.5px solid var(--border); border-radius: 24px;
+      padding: 30px 38px; display: flex; flex-direction: column; align-items: center;
+      gap: 18px; width: 440px;
+      box-shadow: 0 0 60px rgba(245,197,66,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
       position: relative;
-      width: 420px;
     }
-
-    /* corner accents */
     .machine::before, .machine::after {
-      content: '';
-      position: absolute;
-      width: 16px; height: 16px;
-      border-color: var(--gold);
-      border-style: solid;
-      opacity: 0.5;
+      content: ''; position: absolute; width: 14px; height: 14px;
+      border-color: var(--gold); border-style: solid; opacity: 0.4;
     }
-    .machine::before { top: 14px; left: 14px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-    .machine::after  { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+    .machine::before { top:12px; left:12px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+    .machine::after  { bottom:12px; right:12px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
 
-    .reels-container {
-      display: flex;
-      gap: 14px;
-      align-items: center;
+    .player-header {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 14px;
     }
+    .player-name { font-family:'Orbitron',monospace; font-size:15px; font-weight:700; letter-spacing:4px; color:var(--gold); }
+    .player-pts-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+    .pts-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+    .pts-value { font-family:'Orbitron',monospace; font-size:24px; font-weight:900; color:var(--gold); line-height:1; }
+    .pts-value.bump { animation:ptsBump 0.4s ease; }
+    @keyframes ptsBump { 0%{transform:scale(1);} 40%{transform:scale(1.3);color:#fff;} 100%{transform:scale(1);} }
 
-    .reel-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
+    .rules-bar { display:flex; gap:8px; width:100%; }
+    .rule-chip { flex:1; background:#111; border:1px solid var(--border); border-radius:8px; padding:7px 4px; text-align:center; }
+    .rule-chip .rc-pts { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; }
+    .rule-chip .rc-desc { font-size:9px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
+    .rule-chip.gold   .rc-pts { color:var(--gold); }
+    .rule-chip.silver .rc-pts { color:#aaa; }
+    .rule-chip.zero   .rc-pts { color:var(--text-dim); }
 
-    .reel-label {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-    }
+    /* REELS */
+    .reels-container { display:flex; gap:12px; align-items:center; }
+    .reel-col { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .reel-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
 
     .reel-window {
-      width: 90px;
-      height: 110px;
-      background: #111;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: inset 0 4px 16px rgba(0,0,0,0.8);
+      width:92px; height:110px;
+      background:#0a0a0a; border:1.5px solid var(--border); border-radius:12px;
+      overflow:hidden; position:relative;
+      box-shadow: inset 0 6px 20px rgba(0,0,0,0.9);
     }
-
-    /* top/bottom fade */
-    .reel-window::before,
-    .reel-window::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      height: 28px;
-      z-index: 2;
-      pointer-events: none;
+    /* top & bottom fade masks */
+    .reel-window::before, .reel-window::after {
+      content:''; position:absolute; left:0; right:0; height:28px; z-index:2; pointer-events:none;
     }
-    .reel-window::before { top: 0; background: linear-gradient(to bottom, #111, transparent); }
-    .reel-window::after  { bottom: 0; background: linear-gradient(to top, #111, transparent); }
+    .reel-window::before { top:0;    background:linear-gradient(to bottom,#0a0a0a,transparent); }
+    .reel-window::after  { bottom:0; background:linear-gradient(to top,   #0a0a0a,transparent); }
 
-    /* center line */
     .reel-line {
-      position: absolute;
-      top: 50%; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      transform: translateY(-50%);
-      z-index: 3;
-      opacity: 0.6;
+      position:absolute; top:50%; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);
+      transform:translateY(-50%); z-index:3; opacity:0.55;
     }
 
+    /* The track sits INSIDE .reel-window.
+       We use a CSS variable --y set by JS to drive the position.
+       No translateY wrapping needed — JS just keeps cycling --y. */
     .reel-track {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      position: absolute;
+      top: 0; left: 0; width: 100%;
       will-change: transform;
     }
 
     .reel-digit {
-      width: 90px;
-      height: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Orbitron', monospace;
-      font-size: 42px;
-      font-weight: 900;
-      color: var(--text);
-      flex-shrink: 0;
-      user-select: none;
+      width:92px; height:110px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Orbitron',monospace; font-size:44px; font-weight:900;
+      color:var(--text); flex-shrink:0; user-select:none;
     }
 
-    /* divider between reels */
-    .reel-divider {
-      width: 1px;
-      height: 110px;
-      background: var(--border);
-      opacity: 0.5;
-    }
-
-    /* result strip */
-    .result-strip {
-      width: 100%;
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 16px;
-      text-align: center;
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.3s, border-color 0.3s;
-    }
-    .result-strip.spinning { color: #555; }
-    .result-strip.stopped  { color: var(--text-dim); }
-    .result-strip.win      { color: var(--gold); border-color: var(--gold); animation: pulse-border 1s ease-in-out infinite; }
-
-    @keyframes pulse-border {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(245,197,66,0); }
-      50%       { box-shadow: 0 0 12px 3px rgba(245,197,66,0.25); }
-    }
-
-    /* buttons */
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-    }
-
-    .btn {
-      flex: 1;
-      font-family: 'Orbitron', monospace;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 12px 6px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      background: var(--bg-mid);
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn:not(:disabled):hover { filter: brightness(1.2); transform: translateY(-1px); }
-    .btn:not(:disabled):active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .btn-start {
-      border-color: var(--green);
-      color: var(--green);
-      background: rgba(0,184,148,0.08);
-    }
-    .btn-stop-single {
-      border-color: var(--gold-dark);
-      color: var(--gold);
-      background: rgba(245,197,66,0.06);
-    }
-    .btn-stop-all {
-      border-color: var(--red);
-      color: var(--red);
-      background: rgba(214,48,49,0.08);
-    }
-
-    /* individual stop buttons row */
-    .stop-row {
-      display: flex;
-      gap: 14px;
-      width: 100%;
-    }
-
-    .btn-stop-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-stop-col .btn {
-      width: 100%;
-    }
-
+    .reel-divider { width:1px; height:110px; background:var(--border); opacity:0.4; }
     .stop-indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: background 0.3s;
+      width:6px; height:6px; border-radius:50%;
+      background:var(--border); transition:background 0.3s, box-shadow 0.3s;
     }
-    .stop-indicator.stopped { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+    .stop-indicator.stopped { background:var(--gold); box-shadow:0 0 6px var(--gold); }
 
-    /* credit counter */
-    .credits-row {
-      display: flex;
-      gap: 24px;
-      width: 100%;
+    .result-strip {
+      width:100%; background:#111; border:1px solid var(--border); border-radius:8px;
+      padding:10px 16px; text-align:center; font-size:12px; letter-spacing:3px;
+      color:var(--text-dim); text-transform:uppercase; min-height:40px;
+      display:flex; align-items:center; justify-content:center;
+      transition:color 0.3s, border-color 0.3s;
     }
+    .result-strip.spinning { color:#444; }
+    .result-strip.win100 { color:var(--gold); border-color:var(--gold); animation:pulse-gold 1s ease-in-out infinite; }
+    .result-strip.win50  { color:#ccc; border-color:#666; animation:pulse-silver 1s ease-in-out infinite; }
+    .result-strip.zero   { color:var(--text-dim); }
+    @keyframes pulse-gold   { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 14px 3px rgba(245,197,66,0.3);} }
+    @keyframes pulse-silver { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 10px 2px rgba(180,180,180,0.2);} }
 
-    .credit-box {
-      flex: 1;
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      text-align: center;
-    }
-    .credit-label {
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-    .credit-value {
-      font-family: 'Orbitron', monospace;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--gold);
-    }
+    .stats-row { display:flex; gap:10px; width:100%; }
+    .stat-box { flex:1; background:#111; border:1px solid var(--border); border-radius:8px; padding:7px 10px; text-align:center; }
+    .stat-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:3px; }
+    .stat-value { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--text); }
 
-    /* win flash overlay */
-    .win-flash {
-      position: fixed;
-      inset: 0;
-      background: rgba(245,197,66,0.06);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 999;
+    .spin-progress { width:100%; display:flex; align-items:center; gap:12px; }
+    .progress-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); white-space:nowrap; }
+    .progress-dots { display:flex; gap:7px; }
+    .pdot { width:9px; height:9px; border-radius:50%; background:var(--border); transition:background 0.3s; }
+    .pdot.filled { background:var(--gold); box-shadow:0 0 5px var(--gold); }
+
+    .stop-row { display:flex; gap:10px; width:100%; }
+    .btn-stop-col { flex:1; }
+    .btn-row { display:flex; gap:10px; width:100%; }
+    .btn {
+      width:100%; font-family:'Orbitron',monospace; font-size:10px; font-weight:700;
+      letter-spacing:1.5px; text-transform:uppercase; padding:12px 6px;
+      border-radius:8px; border:1.5px solid var(--border);
+      background:var(--bg-mid); color:var(--text-dim); cursor:pointer; transition:all 0.15s;
     }
-    .win-flash.active { opacity: 1; animation: flash 0.6s ease-in-out 3; }
-    @keyframes flash { 0%,100% { opacity:0; } 50% { opacity:1; } }
+    .btn:not(:disabled):hover  { filter:brightness(1.25); transform:translateY(-1px); }
+    .btn:not(:disabled):active { transform:scale(0.97); }
+    .btn:disabled { opacity:0.25; cursor:not-allowed; }
+    .btn-start    { border-color:var(--green); color:var(--green); background:rgba(0,184,148,0.08); }
+    .btn-stop-s   { border-color:var(--gold-dark); color:var(--gold); background:rgba(245,197,66,0.06); }
+    .btn-stop-all { border-color:var(--red); color:var(--red); background:rgba(214,48,49,0.08); }
+
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.88); z-index:100;
+      align-items:center; justify-content:center;
+    }
+    .modal-overlay.visible { display:flex; animation:fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+    .modal-box {
+      background:var(--bg-panel); border:1.5px solid var(--gold); border-radius:20px;
+      padding:36px 40px; width:360px; display:flex; flex-direction:column;
+      align-items:center; gap:18px; box-shadow:0 0 60px rgba(245,197,66,0.2);
+      animation:slideUp 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes slideUp { from{transform:translateY(30px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+    .modal-badge {
+      background:rgba(245,197,66,0.1); border:1px solid rgba(245,197,66,0.35);
+      border-radius:20px; padding:4px 14px;
+      font-size:9px; letter-spacing:3px; color:var(--gold); text-transform:uppercase;
+    }
+    .modal-title { font-family:'Orbitron',monospace; font-size:16px; font-weight:900; letter-spacing:3px; color:var(--text); text-align:center; }
+    .modal-sub { font-size:11px; color:var(--text-dim); letter-spacing:1px; text-align:center; line-height:1.8; }
+    .modal-options { display:flex; gap:12px; width:100%; }
+    .modal-opt {
+      flex:1; background:#111; border:1.5px solid var(--border); border-radius:12px;
+      padding:18px 12px; text-align:center; cursor:pointer; transition:all 0.2s;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .modal-opt:hover { border-color:var(--gold); background:rgba(245,197,66,0.06); transform:translateY(-2px); }
+    .modal-opt .opt-num { font-family:'Orbitron',monospace; font-size:24px; font-weight:900; color:var(--gold); }
+    .modal-opt .opt-label { font-size:10px; letter-spacing:2px; color:var(--text); text-transform:uppercase; }
+    .modal-opt .opt-desc { font-size:10px; color:var(--text-dim); line-height:1.6; }
+
+    .win-flash { position:fixed; inset:0; background:rgba(245,197,66,0.05); pointer-events:none; opacity:0; z-index:50; }
+    .win-flash.active { animation:wflash 0.5s ease-in-out 3; }
+    @keyframes wflash { 0%,100%{opacity:0;} 50%{opacity:1;} }
   </style>
 </head>
 <body>
 
 <div class="win-flash" id="win-flash"></div>
 
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-badge">Every 5 Spins — Bonus Round</div>
+    <div class="modal-title">CHOOSE YOUR BONUS</div>
+    <div class="modal-sub">You've completed 5 spins!<br>Pick an option to continue.</div>
+    <div class="modal-options">
+      <div class="modal-opt" onclick="chooseBonus(1)">
+        <div class="opt-num">1</div>
+        <div class="opt-label">Double Down</div>
+        <div class="opt-desc">Next win awards<br>2&times; points</div>
+      </div>
+      <div class="modal-opt" onclick="chooseBonus(2)">
+        <div class="opt-num">2</div>
+        <div class="opt-label">Safety Net</div>
+        <div class="opt-desc">Next spin can't<br>score zero pts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="machine">
-  <!-- Reels -->
+  <div class="player-header">
+    <div class="player-name">PLAYER 1</div>
+    <div class="player-pts-wrap">
+      <div class="pts-label">TOTAL POINTS</div>
+      <div class="pts-value" id="pts-value">0</div>
+    </div>
+  </div>
+
+  <div class="rules-bar">
+    <div class="rule-chip gold"><div class="rc-pts">+100 PTS</div><div class="rc-desc">ALL 3 SAME</div></div>
+    <div class="rule-chip silver"><div class="rc-pts">+50 PTS</div><div class="rc-desc">ANY 2 SAME</div></div>
+    <div class="rule-chip zero"><div class="rc-pts">0 PTS</div><div class="rc-desc">ALL UNIQUE</div></div>
+  </div>
+
   <div class="reels-container">
     <div class="reel-col">
       <span class="reel-label">COL 1</span>
-      <div class="reel-window" id="win-0">
+      <div class="reel-window">
         <div class="reel-line"></div>
         <div class="reel-track" id="reel-0"></div>
       </div>
       <div class="stop-indicator" id="ind-0"></div>
     </div>
-
     <div class="reel-divider"></div>
-
     <div class="reel-col">
       <span class="reel-label">COL 2</span>
-      <div class="reel-window" id="win-1">
+      <div class="reel-window">
         <div class="reel-line"></div>
         <div class="reel-track" id="reel-1"></div>
       </div>
       <div class="stop-indicator" id="ind-1"></div>
     </div>
-
     <div class="reel-divider"></div>
-
     <div class="reel-col">
       <span class="reel-label">COL 3</span>
-      <div class="reel-window" id="win-2">
+      <div class="reel-window">
         <div class="reel-line"></div>
         <div class="reel-track" id="reel-2"></div>
       </div>
@@ -335,177 +260,287 @@
     </div>
   </div>
 
-  <!-- Result -->
   <div class="result-strip" id="result">PRESS START</div>
 
-  <!-- Credits -->
-  <div class="credits-row">
-    <div class="credit-box">
-      <div class="credit-label">SPINS</div>
-      <div class="credit-value" id="spin-count">0</div>
-    </div>
-    <div class="credit-box">
-      <div class="credit-label">WINS</div>
-      <div class="credit-value" id="win-count">0</div>
-    </div>
-    <div class="credit-box">
-      <div class="credit-label">RESULT</div>
-      <div class="credit-value" id="last-result">—</div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-label">SPINS</div><div class="stat-value" id="spin-count">0</div></div>
+    <div class="stat-box"><div class="stat-label">THIS SPIN</div><div class="stat-value" id="last-pts">&#8212;</div></div>
+    <div class="stat-box"><div class="stat-label">BONUS</div><div class="stat-value" id="bonus-status">&#8212;</div></div>
+  </div>
+
+  <div class="spin-progress">
+    <div class="progress-label">NEXT BONUS IN</div>
+    <div class="progress-dots">
+      <div class="pdot" id="pd0"></div>
+      <div class="pdot" id="pd1"></div>
+      <div class="pdot" id="pd2"></div>
+      <div class="pdot" id="pd3"></div>
+      <div class="pdot" id="pd4"></div>
     </div>
   </div>
 
-  <!-- Individual stops -->
   <div class="stop-row">
-    <div class="btn-stop-col">
-      <button class="btn btn-stop-single" id="btn-stop-0" onclick="stopReel(0)" disabled>STOP 1</button>
-    </div>
-    <div class="btn-stop-col">
-      <button class="btn btn-stop-single" id="btn-stop-1" onclick="stopReel(1)" disabled>STOP 2</button>
-    </div>
-    <div class="btn-stop-col">
-      <button class="btn btn-stop-single" id="btn-stop-2" onclick="stopReel(2)" disabled>STOP 3</button>
-    </div>
+    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-0" onclick="stopReel(0)" disabled>STOP 1</button></div>
+    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-1" onclick="stopReel(1)" disabled>STOP 2</button></div>
+    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-2" onclick="stopReel(2)" disabled>STOP 3</button></div>
   </div>
 
-  <!-- Main controls -->
   <div class="btn-row">
-    <button class="btn btn-start" id="btn-start" onclick="startAll()">▶ START</button>
-    <button class="btn btn-stop-all" id="btn-stop-all" onclick="stopAll()" disabled>■ STOP ALL</button>
+    <button class="btn btn-start" id="btn-start" onclick="startAll()">&#9654; START</button>
+    <button class="btn btn-stop-all" id="btn-stop-all" onclick="stopAll()" disabled>&#9632; STOP ALL</button>
   </div>
 </div>
 
 <script>
-  const NUM_DIGITS = 10;
-  const REEL_H = 110;
+/*
+  APPROACH: Each reel is rendered as a simple canvas-like system.
+  We maintain a floating "topDigit" (can be fractional during spin).
+  We always draw 3 visible digits: topDigit-1, topDigit, topDigit+1,
+  positioned relative to the window centre.
 
-  let state = [
-    { spinning: false, value: 0, offset: 0, raf: null },
-    { spinning: false, value: 0, offset: 0, raf: null },
-    { spinning: false, value: 0, offset: 0, raf: null },
+  TOP-TO-BOTTOM spin: topDigit INCREASES over time.
+  So the sequence seen in the window goes: 0,1,2,3,4,5,6,7,8,9,0,1,...
+  Each digit enters from the TOP and exits through the BOTTOM.
+*/
+
+  const CELL   = 110;   // px — must match CSS height of .reel-digit and .reel-window
+  const DIGITS = 10;
+  const SPEED  = 0.12;  // fractional digits per frame (~7.2 digits/sec at 60fps)
+
+  // State per reel: topDigit is a float; integer part = which digit is at top of window
+  let reels = [
+    { top: 0, spinning: false, raf: null, settled: 0 },
+    { top: 0, spinning: false, raf: null, settled: 0 },
+    { top: 0, spinning: false, raf: null, settled: 0 },
   ];
 
-  let spinCount = 0, winCount = 0;
+  let totalPoints = 0, spinCount = 0;
+  let bonusActive = null, pendingBonus = false;
 
+  /* ── BUILD: put 3 digit divs per reel, we reposition them in JS ── */
   function buildReels() {
     for (let i = 0; i < 3; i++) {
       const track = document.getElementById('reel-' + i);
       track.innerHTML = '';
-      for (let d = 0; d < NUM_DIGITS * 3; d++) {
+      // create enough cells to always cover the window
+      // we'll use 5 cells and reuse them
+      for (let k = 0; k < 5; k++) {
         const el = document.createElement('div');
         el.className = 'reel-digit';
-        el.textContent = d % NUM_DIGITS;
+        el.id = 'cell-' + i + '-' + k;
         track.appendChild(el);
       }
-      setPosition(i, 0);
+      reels[i].top     = 0;
+      reels[i].settled = 0;
+      renderReel(i);
     }
   }
 
-  function setPosition(idx, val) {
+  /*
+    renderReel: given reels[i].top (float), position 5 cells so the window
+    always shows smooth scrolling digits falling top→bottom.
+
+    Window centre = CELL/2 = 55px from top of .reel-window.
+    The digit at integer position Math.floor(top) should appear at:
+      y = -(top % 1) * CELL   (0 when top is exact integer = digit centred)
+    Digit at position floor(top)+k is at y + k*CELL.
+    We show cells for k = -2 .. +2 (5 cells total).
+  */
+  function renderReel(idx) {
     const track = document.getElementById('reel-' + idx);
-    track.style.transition = 'none';
-    track.style.transform = 'translateY(-' + (val * REEL_H) + 'px)';
-    state[idx].value = val;
-    state[idx].offset = val * REEL_H;
+    const t     = reels[idx].top;
+    const base  = Math.floor(t);       // integer digit index at top of window
+    const frac  = t - base;            // 0..1, how far we've scrolled into next digit
+
+    // y offset of the 'base' digit cell (it starts at top of window and moves down)
+    // When frac=0: base digit is at y=0 (top of window, entering from top)
+    // As frac→1: base digit moves to y=CELL (exits bottom), next digit enters
+    const baseY = frac * CELL;   // positive = moves DOWN = top-to-bottom
+
+    for (let k = 0; k < 5; k++) {
+      // k=0 is 2 cells above centre, k=2 is centre, k=4 is 2 below
+      const cellOffset = k - 2;  // -2, -1, 0, 1, 2
+      const digitIdx   = ((base + cellOffset) % DIGITS + DIGITS) % DIGITS;
+      const y          = baseY + cellOffset * CELL;
+
+      const el = document.getElementById('cell-' + idx + '-' + k);
+      el.textContent     = digitIdx;
+      el.style.position  = 'absolute';
+      el.style.top       = y + 'px';
+      el.style.left      = '0';
+      el.style.width     = '92px';
+      el.style.height    = CELL + 'px';
+    }
   }
 
+  /* ── SPIN ── */
   function startSpin(idx) {
-    state[idx].spinning = true;
-    state[idx].offset = state[idx].value * REEL_H;
-
-    const maxOffset = NUM_DIGITS * REEL_H * 2;
+    reels[idx].spinning = true;
 
     function tick() {
-      if (!state[idx].spinning) return;
-      state[idx].offset += 5;
-      if (state[idx].offset >= maxOffset) state[idx].offset -= NUM_DIGITS * REEL_H;
-
-      const track = document.getElementById('reel-' + idx);
-      track.style.transition = 'none';
-      track.style.transform = 'translateY(-' + state[idx].offset + 'px)';
-
-      state[idx].raf = requestAnimationFrame(tick);
+      if (!reels[idx].spinning) return;
+      reels[idx].top += SPEED;
+      // keep top from growing forever
+      if (reels[idx].top > DIGITS * 100) reels[idx].top -= DIGITS;
+      renderReel(idx);
+      reels[idx].raf = requestAnimationFrame(tick);
     }
     tick();
   }
 
+  /* ── STOP: snap to nearest integer digit ── */
   function stopReel(idx) {
-    if (!state[idx].spinning) return;
-    state[idx].spinning = false;
-    cancelAnimationFrame(state[idx].raf);
+    if (!reels[idx].spinning) return;
+    reels[idx].spinning = false;
+    cancelAnimationFrame(reels[idx].raf);
 
-    const rawPos = state[idx].offset;
-    let digit = Math.round(rawPos / REEL_H) % NUM_DIGITS;
-    if (digit < 0) digit += NUM_DIGITS;
+    // Round top to nearest integer = nearest digit boundary
+    const snapped = Math.round(reels[idx].top);
+    const digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
 
-    const track = document.getElementById('reel-' + idx);
-    track.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
-    track.style.transform = 'translateY(-' + (digit * REEL_H) + 'px)';
-    state[idx].value = digit;
-    state[idx].offset = digit * REEL_H;
-
-    document.getElementById('ind-' + idx).classList.add('stopped');
-    document.getElementById('btn-stop-' + idx).disabled = true;
-
-    checkDone();
+    // Animate the last fraction smoothly with a quick CSS-like lerp
+    animateSnap(idx, reels[idx].top, snapped, digit);
   }
 
-  function stopAll() {
-    for (let i = 0; i < 3; i++) stopReel(i);
+  function animateSnap(idx, from, to, digit) {
+    const duration = 300; // ms
+    const start    = performance.now();
+
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      // ease out cubic
+      const ease = 1 - Math.pow(1 - p, 3);
+      reels[idx].top = from + (to - from) * ease;
+      renderReel(idx);
+
+      if (p < 1) {
+        reels[idx].raf = requestAnimationFrame(step);
+      } else {
+        reels[idx].top     = to;
+        reels[idx].settled = digit;
+        renderReel(idx);
+        document.getElementById('ind-' + idx).classList.add('stopped');
+        document.getElementById('btn-stop-' + idx).disabled = true;
+        checkDone();
+      }
+    }
+    requestAnimationFrame(step);
   }
 
+  function stopAll() { for (let i = 0; i < 3; i++) stopReel(i); }
+
+  /* ── START ── */
   function startAll() {
+    if (pendingBonus) return;
+
     spinCount++;
     document.getElementById('spin-count').textContent = spinCount;
-    document.getElementById('last-result').textContent = '—';
+    document.getElementById('last-pts').textContent   = '—';
+    document.getElementById('last-pts').style.color   = '';
 
     for (let i = 0; i < 3; i++) {
       document.getElementById('ind-' + i).classList.remove('stopped');
       document.getElementById('btn-stop-' + i).disabled = false;
     }
-
-    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-start').disabled    = true;
     document.getElementById('btn-stop-all').disabled = false;
 
     const res = document.getElementById('result');
     res.textContent = 'SPINNING...';
-    res.className = 'result-strip spinning';
+    res.className   = 'result-strip spinning';
 
+    updateDots();
     for (let i = 0; i < 3; i++) startSpin(i);
   }
 
+  /* ── SCORE ── */
   function checkDone() {
-    const allStopped = state.every(s => !s.spinning);
-    if (!allStopped) return;
+    if (reels.some(r => r.spinning)) return;
+    // also wait for snap animations
+    for (let i = 0; i < 3; i++) {
+      if (reels[i].raf) {
+        // still animating — checkDone will be called again after snap finishes
+        if (reels.filter(r => !r.spinning).length < 3) return;
+      }
+    }
 
     document.getElementById('btn-stop-all').disabled = true;
-    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-start').disabled    = false;
 
-    const vals = state.map(s => s.value);
-    const result = document.getElementById('result');
-    const lastRes = document.getElementById('last-result');
+    const vals    = reels.map(r => r.settled);
+    const allSame = vals[0] === vals[1] && vals[1] === vals[2];
+    const anyPair = vals[0] === vals[1] || vals[1] === vals[2] || vals[0] === vals[2];
 
-    const allSame = vals.every(v => v === vals[0]);
-    const twoPairs = vals[0] === vals[1] || vals[1] === vals[2] || vals[0] === vals[2];
+    let pts = 0, label = '', cls = 'zero';
 
     if (allSame) {
-      result.textContent = vals.join('  ·  ') + '  —  JACKPOT!';
-      result.className = 'result-strip win';
-      winCount++;
-      document.getElementById('win-count').textContent = winCount;
-      lastRes.textContent = 'WIN';
-      lastRes.style.color = 'var(--gold)';
-      document.getElementById('win-flash').classList.add('active');
-      setTimeout(() => document.getElementById('win-flash').classList.remove('active'), 2000);
-    } else if (twoPairs) {
-      result.textContent = vals.join('  ·  ') + '  —  PAIR!';
-      result.className = 'result-strip stopped';
-      lastRes.textContent = 'PAIR';
-      lastRes.style.color = 'var(--gold-dark)';
+      pts = 100; cls = 'win100';
+      label = vals.join('  ·  ') + '  —  +100 PTS  ★';
+    } else if (anyPair) {
+      pts = 50; cls = 'win50';
+      label = vals.join('  ·  ') + '  —  +50 PTS';
     } else {
-      result.textContent = vals.join('  ·  ') + '  —  TRY AGAIN';
-      result.className = 'result-strip stopped';
-      lastRes.textContent = 'MISS';
-      lastRes.style.color = 'var(--text-dim)';
+      if (bonusActive === 'safety') {
+        pts = 25; cls = 'win50';
+        label = vals.join('  ·  ') + '  —  +25 PTS (SAFETY NET)';
+      } else {
+        pts = 0; cls = 'zero';
+        label = vals.join('  ·  ') + '  —  0 PTS';
+      }
+    }
+
+    if (bonusActive === 'double' && pts > 0) { pts *= 2; label += '  ×2!'; }
+
+    if (bonusActive) {
+      bonusActive = null;
+      document.getElementById('bonus-status').textContent = '—';
+      document.getElementById('bonus-status').style.color = '';
+    }
+
+    totalPoints += pts;
+
+    document.getElementById('last-pts').textContent = pts > 0 ? '+' + pts : '0';
+    document.getElementById('last-pts').style.color = pts > 0 ? 'var(--gold)' : 'var(--text-dim)';
+
+    const pEl = document.getElementById('pts-value');
+    pEl.textContent = totalPoints;
+    pEl.classList.remove('bump');
+    void pEl.offsetWidth;
+    if (pts > 0) pEl.classList.add('bump');
+
+    const res = document.getElementById('result');
+    res.textContent = label;
+    res.className   = 'result-strip ' + cls;
+
+    if (allSame) {
+      const wf = document.getElementById('win-flash');
+      wf.classList.remove('active'); void wf.offsetWidth;
+      wf.classList.add('active');
+    }
+
+    if (spinCount % 5 === 0) {
+      pendingBonus = true;
+      document.getElementById('btn-start').disabled = true;
+      setTimeout(() => document.getElementById('modal').classList.add('visible'), 800);
+    }
+  }
+
+  /* ── BONUS ── */
+  function chooseBonus(opt) {
+    document.getElementById('modal').classList.remove('visible');
+    pendingBonus = false;
+    bonusActive  = opt === 1 ? 'double' : 'safety';
+    document.getElementById('bonus-status').textContent = opt === 1 ? '×2' : 'NET';
+    document.getElementById('bonus-status').style.color = 'var(--gold)';
+    document.getElementById('btn-start').disabled = false;
+    for (let i = 0; i < 5; i++) document.getElementById('pd' + i).classList.remove('filled');
+  }
+
+  /* ── DOTS ── */
+  function updateDots() {
+    const pos = (spinCount - 1) % 5;
+    for (let i = 0; i < 5; i++) {
+      document.getElementById('pd' + i).classList.toggle('filled', i <= pos);
     }
   }
 
