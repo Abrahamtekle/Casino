@@ -542,13 +542,15 @@
     r.spinning = false;
     cancelAnimationFrame(r.raf);
 
-    const snapped = Math.round(r.top);
+    // Capture current position BEFORE modifying anything
+    const from    = r.top;
+    const snapped = Math.round(from);
     const digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
+
+    // Store settled digit now
     r.settled = digit;
-    r.top     = snapped;
 
     const dur   = 260;
-    const from  = r.top;
     const start = performance.now();
 
     function step(now) {
@@ -579,6 +581,22 @@
   /* SCORE — called exactly once when all 3 reels done */
   function scoreAndContinue(p) {
     document.getElementById('stopall-' + p).disabled = true;
+
+    // Every 5th spin: force all 3 reels to the same digit (guaranteed win)
+    if (players[p].spinCount % 5 === 0) {
+      const win = players[p].reels[0].settled; // pick reel 0's value
+      players[p].reels[1].settled = win;
+      players[p].reels[2].settled = win;
+      // update visuals for reels 1 and 2
+      [1, 2].forEach(i => {
+        const r = players[p].reels[i];
+        const base = Math.floor(r.top);
+        const cur  = ((base % DIGITS) + DIGITS) % DIGITS;
+        const diff = ((win - cur) + DIGITS) % DIGITS;
+        r.top = base + diff;
+        renderReel(p, i);
+      });
+    }
 
     const vals    = players[p].reels.map(r => r.settled);
     const allSame = vals[0] === vals[1] && vals[1] === vals[2];
@@ -643,6 +661,8 @@
 
     updateDots(p);
     for (let i = 0; i < 3; i++) {
+      // Give each reel a different random offset so they never land on the same digit
+      players[p].reels[i].top = Math.random() * DIGITS * 10;
       players[p].reels[i].spinning = true;
       players[p].reels[i].raf = requestAnimationFrame(() => spinTick(p, i));
     }
