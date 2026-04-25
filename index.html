@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Fragment } from 'react';
 
 const SLOT_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
@@ -384,7 +384,7 @@ export default function SlotMachineGame() {
       G[p].spins++;
       G[p].stopped = 0;
       G[p].isFive = G[p].spins % 5 === 0;
-      G[p].showDollar = [false, false, false];
+      G[p].showDollar = [false, false, false]; // reset dollar signs on new spin
       el('sp-' + p)!.textContent = String(G[p].spins);
       el('last-' + p)!.textContent = '—';
       (el('last-' + p) as HTMLElement).style.color = '';
@@ -415,6 +415,7 @@ export default function SlotMachineGame() {
       (el('bstart-p2') as HTMLButtonElement).disabled = next !== 'p2';
     }
 
+    // Event delegation
     const root = rootRef.current;
     function handleClick(e: Event) {
       const target = e.target as HTMLElement;
@@ -435,6 +436,7 @@ export default function SlotMachineGame() {
     return () => {
       style.remove();
       root?.removeEventListener('click', handleClick as EventListener);
+      // cancel all rafs
       ['p1', 'p2'].forEach(p => {
         G[p].reel.forEach(r => { if (r.raf) cancelAnimationFrame(r.raf); });
       });
@@ -457,9 +459,9 @@ export default function SlotMachineGame() {
       <div className="turn-banner" id={`turn-${p}`}>{isOn ? 'YOUR TURN' : 'WAITING...'}</div>
       <div className="reels">
         {[0, 1, 2].map((i) => (
-          <>
-            {i > 0 && <div key={`div-${i}`} className="reel-div" />}
-            <div key={`col-${i}`} className="reel-col">
+          <Fragment key={i}>
+            {i > 0 && <div className="reel-div" />}
+            <div className="reel-col">
               <span className="reel-lbl">COL {i + 1}</span>
               <div className="reel-win">
                 <div className="reel-line" />
@@ -467,7 +469,7 @@ export default function SlotMachineGame() {
               </div>
               <div className="stop-dot" id={`sd-${p}-${i}`} />
             </div>
-          </>
+          </Fragment>
         ))}
       </div>
       <div className="result" id={`res-${p}`}>{isOn ? 'PRESS START' : 'WAITING...'}</div>
