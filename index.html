@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Slot Machine — Player 1</title>
+  <title>Slot Machine — 2 Players</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,168 +12,240 @@
       --gold-dark: #c9972a;
       --red: #d63031;
       --green: #00b894;
+      --blue: #4fc3f7;
+      --blue-dim: #1a78a0;
       --bg-deep: #0d0d0d;
       --bg-mid: #1a1a1a;
       --bg-panel: #1e1e1e;
       --border: #3a3a3a;
       --text: #f0e6cc;
-      --text-dim: #777;
+      --text-dim: #666;
     }
+
     body {
       background: var(--bg-deep);
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Share Tech Mono', monospace;
       color: var(--text);
+      padding: 24px 16px;
     }
     body::before {
       content: ''; position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(245,197,66,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,197,66,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(245,197,66,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,197,66,0.025) 1px, transparent 1px);
       background-size: 40px 40px; pointer-events: none;
     }
 
-    .machine {
-      background: var(--bg-panel); border: 1.5px solid var(--border); border-radius: 24px;
-      padding: 30px 38px; display: flex; flex-direction: column; align-items: center;
-      gap: 18px; width: 440px;
-      box-shadow: 0 0 60px rgba(245,197,66,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
-      position: relative;
+    /* ── LAYOUT ── */
+    .game-wrap {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 960px;
     }
-    .machine::before, .machine::after {
-      content: ''; position: absolute; width: 14px; height: 14px;
-      border-color: var(--gold); border-style: solid; opacity: 0.4;
-    }
-    .machine::before { top:12px; left:12px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
-    .machine::after  { bottom:12px; right:12px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
 
+    /* ── SCOREBOARD (centre) ── */
+    .scoreboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding-top: 20px;
+      min-width: 80px;
+    }
+    .vs-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px; font-weight: 900;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+    }
+    .turn-arrow {
+      font-size: 20px;
+      transition: transform 0.4s, color 0.4s;
+    }
+    .turn-arrow.p1 { color: var(--gold); transform: rotate(180deg); }
+    .turn-arrow.p2 { color: var(--blue); transform: rotate(0deg); }
+    .score-divider { width: 1px; height: 60px; background: var(--border); }
+
+    /* ── MACHINE ── */
+    .machine {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 28px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .machine.active-p1 {
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(245,197,66,0.15);
+    }
+    .machine.active-p2 {
+      border-color: var(--blue);
+      box-shadow: 0 0 30px rgba(79,195,247,0.15);
+    }
+    .machine.inactive {
+      opacity: 0.55;
+    }
+
+    /* corner accents */
+    .machine::before, .machine::after {
+      content: ''; position: absolute; width: 12px; height: 12px;
+      border-style: solid; opacity: 0.5;
+    }
+    .machine.p1::before, .machine.p1::after { border-color: var(--gold); }
+    .machine.p2::before, .machine.p2::after { border-color: var(--blue); }
+    .machine::before { top:10px; left:10px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+    .machine::after  { bottom:10px; right:10px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
+
+    /* ── PLAYER HEADER ── */
     .player-header {
       display: flex; align-items: center; justify-content: space-between;
-      width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 14px;
+      width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 12px;
     }
-    .player-name { font-family:'Orbitron',monospace; font-size:15px; font-weight:700; letter-spacing:4px; color:var(--gold); }
-    .player-pts-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
-    .pts-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
-    .pts-value { font-family:'Orbitron',monospace; font-size:24px; font-weight:900; color:var(--gold); line-height:1; }
-    .pts-value.bump { animation:ptsBump 0.4s ease; }
-    @keyframes ptsBump { 0%{transform:scale(1);} 40%{transform:scale(1.3);color:#fff;} 100%{transform:scale(1);} }
+    .player-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px; font-weight: 700; letter-spacing: 4px;
+    }
+    .machine.p1 .player-name { color: var(--gold); }
+    .machine.p2 .player-name { color: var(--blue); }
 
-    .rules-bar { display:flex; gap:8px; width:100%; }
-    .rule-chip { flex:1; background:#111; border:1px solid var(--border); border-radius:8px; padding:7px 4px; text-align:center; }
-    .rule-chip .rc-pts { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; }
-    .rule-chip .rc-desc { font-size:9px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
-    .rule-chip.gold   .rc-pts { color:var(--gold); }
-    .rule-chip.silver .rc-pts { color:#aaa; }
-    .rule-chip.zero   .rc-pts { color:var(--text-dim); }
+    .player-pts-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+    .pts-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+    .pts-value { font-family:'Orbitron',monospace; font-size:22px; font-weight:900; line-height:1; }
+    .machine.p1 .pts-value { color: var(--gold); }
+    .machine.p2 .pts-value { color: var(--blue); }
+    .pts-value.bump { animation: ptsBump 0.4s ease; }
+    @keyframes ptsBump { 0%{transform:scale(1);} 40%{transform:scale(1.35);color:#fff;} 100%{transform:scale(1);} }
 
-    /* REELS */
-    .reels-container { display:flex; gap:12px; align-items:center; }
-    .reel-col { display:flex; flex-direction:column; align-items:center; gap:8px; }
-    .reel-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+    /* ── REELS ── */
+    .reels-container { display:flex; gap:8px; align-items:center; }
+    .reel-col { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .reel-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
 
     .reel-window {
-      width:92px; height:110px;
-      background:#0a0a0a; border:1.5px solid var(--border); border-radius:12px;
+      width:80px; height:96px;
+      background:#0a0a0a; border:1.5px solid var(--border); border-radius:10px;
       overflow:hidden; position:relative;
-      box-shadow: inset 0 6px 20px rgba(0,0,0,0.9);
+      box-shadow: inset 0 4px 16px rgba(0,0,0,0.9);
     }
-    /* top & bottom fade masks */
     .reel-window::before, .reel-window::after {
-      content:''; position:absolute; left:0; right:0; height:28px; z-index:2; pointer-events:none;
+      content:''; position:absolute; left:0; right:0; height:24px; z-index:2; pointer-events:none;
     }
     .reel-window::before { top:0;    background:linear-gradient(to bottom,#0a0a0a,transparent); }
     .reel-window::after  { bottom:0; background:linear-gradient(to top,   #0a0a0a,transparent); }
-
     .reel-line {
       position:absolute; top:50%; left:0; right:0; height:2px;
-      background:linear-gradient(90deg,transparent,var(--gold),transparent);
-      transform:translateY(-50%); z-index:3; opacity:0.55;
+      transform:translateY(-50%); z-index:3; opacity:0.6;
     }
+    .machine.p1 .reel-line { background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+    .machine.p2 .reel-line { background:linear-gradient(90deg,transparent,var(--blue),transparent); }
 
-    /* The track sits INSIDE .reel-window.
-       We use a CSS variable --y set by JS to drive the position.
-       No translateY wrapping needed — JS just keeps cycling --y. */
-    .reel-track {
-      position: absolute;
-      top: 0; left: 0; width: 100%;
-      will-change: transform;
-    }
-
+    .reel-track { position:absolute; top:0; left:0; width:100%; will-change:transform; }
     .reel-digit {
-      width:92px; height:110px;
+      width:80px; height:96px;
       display:flex; align-items:center; justify-content:center;
-      font-family:'Orbitron',monospace; font-size:44px; font-weight:900;
+      font-family:'Orbitron',monospace; font-size:38px; font-weight:900;
       color:var(--text); flex-shrink:0; user-select:none;
     }
-
-    .reel-divider { width:1px; height:110px; background:var(--border); opacity:0.4; }
+    .reel-divider { width:1px; height:96px; background:var(--border); opacity:0.3; }
     .stop-indicator {
-      width:6px; height:6px; border-radius:50%;
+      width:5px; height:5px; border-radius:50%;
       background:var(--border); transition:background 0.3s, box-shadow 0.3s;
     }
-    .stop-indicator.stopped { background:var(--gold); box-shadow:0 0 6px var(--gold); }
+    .machine.p1 .stop-indicator.stopped { background:var(--gold); box-shadow:0 0 5px var(--gold); }
+    .machine.p2 .stop-indicator.stopped { background:var(--blue); box-shadow:0 0 5px var(--blue); }
 
+    /* ── RESULT ── */
     .result-strip {
-      width:100%; background:#111; border:1px solid var(--border); border-radius:8px;
-      padding:10px 16px; text-align:center; font-size:12px; letter-spacing:3px;
-      color:var(--text-dim); text-transform:uppercase; min-height:40px;
+      width:100%; background:#111; border:1px solid var(--border); border-radius:7px;
+      padding:8px 12px; text-align:center; font-size:11px; letter-spacing:2px;
+      color:var(--text-dim); text-transform:uppercase; min-height:36px;
       display:flex; align-items:center; justify-content:center;
       transition:color 0.3s, border-color 0.3s;
     }
-    .result-strip.spinning { color:#444; }
+    .result-strip.spinning { color:#333; }
     .result-strip.win100 { color:var(--gold); border-color:var(--gold); animation:pulse-gold 1s ease-in-out infinite; }
-    .result-strip.win50  { color:#ccc; border-color:#666; animation:pulse-silver 1s ease-in-out infinite; }
+    .result-strip.win50  { color:#bbb; border-color:#555; animation:pulse-silver 1s ease-in-out infinite; }
     .result-strip.zero   { color:var(--text-dim); }
-    @keyframes pulse-gold   { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 14px 3px rgba(245,197,66,0.3);} }
-    @keyframes pulse-silver { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 10px 2px rgba(180,180,180,0.2);} }
+    @keyframes pulse-gold   { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 12px 2px rgba(245,197,66,0.3);} }
+    @keyframes pulse-silver { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 8px 1px rgba(180,180,180,0.2);} }
 
-    .stats-row { display:flex; gap:10px; width:100%; }
-    .stat-box { flex:1; background:#111; border:1px solid var(--border); border-radius:8px; padding:7px 10px; text-align:center; }
-    .stat-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:3px; }
-    .stat-value { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--text); }
+    /* ── STATS ── */
+    .stats-row { display:flex; gap:8px; width:100%; }
+    .stat-box { flex:1; background:#111; border:1px solid var(--border); border-radius:7px; padding:6px 8px; text-align:center; }
+    .stat-label { font-size:7px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:2px; }
+    .stat-value { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:var(--text); }
 
-    .spin-progress { width:100%; display:flex; align-items:center; gap:12px; }
-    .progress-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); white-space:nowrap; }
-    .progress-dots { display:flex; gap:7px; }
-    .pdot { width:9px; height:9px; border-radius:50%; background:var(--border); transition:background 0.3s; }
-    .pdot.filled { background:var(--gold); box-shadow:0 0 5px var(--gold); }
+    /* ── PROGRESS DOTS ── */
+    .spin-progress { width:100%; display:flex; align-items:center; gap:10px; }
+    .progress-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); white-space:nowrap; }
+    .progress-dots { display:flex; gap:5px; }
+    .pdot { width:8px; height:8px; border-radius:50%; background:var(--border); transition:background 0.3s; }
+    .machine.p1 .pdot.filled { background:var(--gold); box-shadow:0 0 4px var(--gold); }
+    .machine.p2 .pdot.filled { background:var(--blue);  box-shadow:0 0 4px var(--blue); }
 
-    .stop-row { display:flex; gap:10px; width:100%; }
+    /* ── BUTTONS ── */
+    .stop-row { display:flex; gap:8px; width:100%; }
     .btn-stop-col { flex:1; }
-    .btn-row { display:flex; gap:10px; width:100%; }
+    .btn-row { display:flex; gap:8px; width:100%; }
     .btn {
-      width:100%; font-family:'Orbitron',monospace; font-size:10px; font-weight:700;
-      letter-spacing:1.5px; text-transform:uppercase; padding:12px 6px;
-      border-radius:8px; border:1.5px solid var(--border);
+      width:100%; font-family:'Orbitron',monospace; font-size:9px; font-weight:700;
+      letter-spacing:1px; text-transform:uppercase; padding:10px 4px;
+      border-radius:7px; border:1.5px solid var(--border);
       background:var(--bg-mid); color:var(--text-dim); cursor:pointer; transition:all 0.15s;
     }
-    .btn:not(:disabled):hover  { filter:brightness(1.25); transform:translateY(-1px); }
+    .btn:not(:disabled):hover  { filter:brightness(1.3); transform:translateY(-1px); }
     .btn:not(:disabled):active { transform:scale(0.97); }
-    .btn:disabled { opacity:0.25; cursor:not-allowed; }
-    .btn-start    { border-color:var(--green); color:var(--green); background:rgba(0,184,148,0.08); }
-    .btn-stop-s   { border-color:var(--gold-dark); color:var(--gold); background:rgba(245,197,66,0.06); }
-    .btn-stop-all { border-color:var(--red); color:var(--red); background:rgba(214,48,49,0.08); }
+    .btn:disabled { opacity:0.2; cursor:not-allowed; }
 
+    .machine.p1 .btn-start    { border-color:var(--green); color:var(--green); background:rgba(0,184,148,0.08); }
+    .machine.p1 .btn-stop-s   { border-color:var(--gold-dark); color:var(--gold); background:rgba(245,197,66,0.06); }
+    .machine.p1 .btn-stop-all { border-color:var(--red); color:var(--red); background:rgba(214,48,49,0.08); }
+
+    .machine.p2 .btn-start    { border-color:var(--green); color:var(--green); background:rgba(0,184,148,0.08); }
+    .machine.p2 .btn-stop-s   { border-color:var(--blue-dim); color:var(--blue); background:rgba(79,195,247,0.06); }
+    .machine.p2 .btn-stop-all { border-color:var(--red); color:var(--red); background:rgba(214,48,49,0.08); }
+
+    /* ── TURN BANNER ── */
+    .turn-banner {
+      font-size:8px; letter-spacing:3px; color:var(--text-dim);
+      text-transform:uppercase; padding:4px 0; text-align:center;
+      width:100%;
+    }
+    .machine.p1.active-p1 .turn-banner { color:var(--gold); }
+    .machine.p2.active-p2 .turn-banner { color:var(--blue); }
+
+    /* ── MODAL ── */
     .modal-overlay {
       display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.88); z-index:100;
+      background:rgba(0,0,0,0.9); z-index:100;
       align-items:center; justify-content:center;
     }
     .modal-overlay.visible { display:flex; animation:fadeIn 0.3s ease; }
     @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
     .modal-box {
-      background:var(--bg-panel); border:1.5px solid var(--gold); border-radius:20px;
+      background:var(--bg-panel); border-radius:20px;
       padding:36px 40px; width:360px; display:flex; flex-direction:column;
-      align-items:center; gap:18px; box-shadow:0 0 60px rgba(245,197,66,0.2);
+      align-items:center; gap:18px;
       animation:slideUp 0.35s cubic-bezier(0.22,1,0.36,1);
     }
+    .modal-box.p1-modal { border:1.5px solid var(--gold); box-shadow:0 0 60px rgba(245,197,66,0.2); }
+    .modal-box.p2-modal { border:1.5px solid var(--blue); box-shadow:0 0 60px rgba(79,195,247,0.2); }
     @keyframes slideUp { from{transform:translateY(30px);opacity:0;} to{transform:translateY(0);opacity:1;} }
     .modal-badge {
-      background:rgba(245,197,66,0.1); border:1px solid rgba(245,197,66,0.35);
       border-radius:20px; padding:4px 14px;
-      font-size:9px; letter-spacing:3px; color:var(--gold); text-transform:uppercase;
+      font-size:9px; letter-spacing:3px; text-transform:uppercase;
     }
+    .modal-box.p1-modal .modal-badge { background:rgba(245,197,66,0.1); border:1px solid rgba(245,197,66,0.35); color:var(--gold); }
+    .modal-box.p2-modal .modal-badge { background:rgba(79,195,247,0.1);  border:1px solid rgba(79,195,247,0.35);  color:var(--blue); }
     .modal-title { font-family:'Orbitron',monospace; font-size:16px; font-weight:900; letter-spacing:3px; color:var(--text); text-align:center; }
     .modal-sub { font-size:11px; color:var(--text-dim); letter-spacing:1px; text-align:center; line-height:1.8; }
     .modal-options { display:flex; gap:12px; width:100%; }
@@ -182,390 +254,485 @@
       padding:18px 12px; text-align:center; cursor:pointer; transition:all 0.2s;
       display:flex; flex-direction:column; gap:8px;
     }
-    .modal-opt:hover { border-color:var(--gold); background:rgba(245,197,66,0.06); transform:translateY(-2px); }
-    .modal-opt .opt-num { font-family:'Orbitron',monospace; font-size:24px; font-weight:900; color:var(--gold); }
+    .modal-box.p1-modal .modal-opt:hover { border-color:var(--gold); background:rgba(245,197,66,0.06); transform:translateY(-2px); }
+    .modal-box.p2-modal .modal-opt:hover { border-color:var(--blue);  background:rgba(79,195,247,0.06);  transform:translateY(-2px); }
+    .modal-opt .opt-num { font-family:'Orbitron',monospace; font-size:24px; font-weight:900; }
+    .modal-box.p1-modal .opt-num { color:var(--gold); }
+    .modal-box.p2-modal .opt-num { color:var(--blue); }
     .modal-opt .opt-label { font-size:10px; letter-spacing:2px; color:var(--text); text-transform:uppercase; }
     .modal-opt .opt-desc { font-size:10px; color:var(--text-dim); line-height:1.6; }
 
-    .win-flash { position:fixed; inset:0; background:rgba(245,197,66,0.05); pointer-events:none; opacity:0; z-index:50; }
+    /* ── WIN FLASH ── */
+    .win-flash { position:fixed; inset:0; pointer-events:none; opacity:0; z-index:50; }
+    .win-flash.p1 { background:rgba(245,197,66,0.05); }
+    .win-flash.p2 { background:rgba(79,195,247,0.05); }
     .win-flash.active { animation:wflash 0.5s ease-in-out 3; }
     @keyframes wflash { 0%,100%{opacity:0;} 50%{opacity:1;} }
+
+    /* ── WINNER BANNER ── */
+    .winner-banner {
+      display:none; position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,0.92);
+      align-items:center; justify-content:center; flex-direction:column; gap:24px;
+    }
+    .winner-banner.visible { display:flex; animation:fadeIn 0.4s ease; }
+    .winner-text { font-family:'Orbitron',monospace; font-size:32px; font-weight:900; letter-spacing:6px; text-align:center; }
+    .winner-text.p1 { color:var(--gold); }
+    .winner-text.p2 { color:var(--blue); }
+    .winner-sub { font-size:13px; letter-spacing:3px; color:var(--text-dim); }
+    .btn-reset {
+      font-family:'Orbitron',monospace; font-size:11px; font-weight:700; letter-spacing:2px;
+      padding:14px 32px; border-radius:10px; border:1.5px solid var(--green);
+      background:rgba(0,184,148,0.08); color:var(--green); cursor:pointer; transition:all 0.15s;
+      text-transform:uppercase; margin-top:8px;
+    }
+    .btn-reset:hover { filter:brightness(1.3); transform:translateY(-1px); }
   </style>
 </head>
 <body>
 
-<div class="win-flash" id="win-flash"></div>
+<div class="win-flash p1" id="win-flash-p1"></div>
+<div class="win-flash p2" id="win-flash-p2"></div>
 
+<!-- BONUS MODAL -->
 <div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <div class="modal-badge">Every 5 Spins &#8212; Bonus Round</div>
-    <div class="modal-title">CLAIM YOUR BONUS</div>
-    <div class="modal-sub">You've completed 5 spins, Player 1!<br>Pick one bonus to add to your score.</div>
+  <div class="modal-box" id="modal-box">
+    <div class="modal-badge" id="modal-badge">Bonus Round</div>
+    <div class="modal-title" id="modal-title">CLAIM YOUR BONUS</div>
+    <div class="modal-sub" id="modal-sub">Pick one bonus to add to your score.</div>
     <div class="modal-options">
       <div class="modal-opt" onclick="chooseBonus(1)">
         <div class="opt-num">1</div>
         <div class="opt-label">Big Reward</div>
-        <div class="opt-desc">Claim instantly<br><span style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--gold);">+100 PTS</span></div>
+        <div class="opt-desc">Claim instantly<br><span id="opt1-pts" style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;">+100 PTS</span></div>
       </div>
       <div class="modal-opt" onclick="chooseBonus(2)">
         <div class="opt-num">2</div>
         <div class="opt-label">Quick Boost</div>
-        <div class="opt-desc">Claim instantly<br><span style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#aaa;">+50 PTS</span></div>
+        <div class="opt-desc">Claim instantly<br><span id="opt2-pts" style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#aaa;">+50 PTS</span></div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="machine">
-  <div class="player-header">
-    <div class="player-name">PLAYER 1</div>
-    <div class="player-pts-wrap">
-      <div class="pts-label">TOTAL POINTS</div>
-      <div class="pts-value" id="pts-value">0</div>
-    </div>
-  </div>
+<!-- WINNER BANNER -->
+<div class="winner-banner" id="winner-banner">
+  <div class="winner-text" id="winner-text">PLAYER 1 WINS!</div>
+  <div class="winner-sub" id="winner-score"></div>
+  <button class="btn-reset" onclick="resetGame()">&#9654; PLAY AGAIN</button>
+</div>
 
+<div class="game-wrap">
 
-
-  <div class="reels-container">
-    <div class="reel-col">
-      <span class="reel-label">COL 1</span>
-      <div class="reel-window">
-        <div class="reel-line"></div>
-        <div class="reel-track" id="reel-0"></div>
+  <!-- PLAYER 1 -->
+  <div class="machine p1 active-p1" id="machine-p1">
+    <div class="player-header">
+      <div class="player-name">PLAYER 1</div>
+      <div class="player-pts-wrap">
+        <div class="pts-label">POINTS</div>
+        <div class="pts-value" id="pts-p1">0</div>
       </div>
-      <div class="stop-indicator" id="ind-0"></div>
     </div>
-    <div class="reel-divider"></div>
-    <div class="reel-col">
-      <span class="reel-label">COL 2</span>
-      <div class="reel-window">
-        <div class="reel-line"></div>
-        <div class="reel-track" id="reel-1"></div>
+
+    <div class="turn-banner" id="turn-p1">YOUR TURN</div>
+
+    <div class="reels-container">
+      <div class="reel-col">
+        <span class="reel-label">COL 1</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p1-0"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p1-0"></div>
       </div>
-      <div class="stop-indicator" id="ind-1"></div>
-    </div>
-    <div class="reel-divider"></div>
-    <div class="reel-col">
-      <span class="reel-label">COL 3</span>
-      <div class="reel-window">
-        <div class="reel-line"></div>
-        <div class="reel-track" id="reel-2"></div>
+      <div class="reel-divider"></div>
+      <div class="reel-col">
+        <span class="reel-label">COL 2</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p1-1"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p1-1"></div>
       </div>
-      <div class="stop-indicator" id="ind-2"></div>
+      <div class="reel-divider"></div>
+      <div class="reel-col">
+        <span class="reel-label">COL 3</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p1-2"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p1-2"></div>
+      </div>
+    </div>
+
+    <div class="result-strip" id="result-p1">PRESS START</div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-label">SPINS</div><div class="stat-value" id="spins-p1">0</div></div>
+      <div class="stat-box"><div class="stat-label">THIS SPIN</div><div class="stat-value" id="last-p1">&#8212;</div></div>
+      <div class="stat-box"><div class="stat-label">BONUS</div><div class="stat-value" id="bonus-p1">&#8212;</div></div>
+    </div>
+
+    <div class="spin-progress">
+      <div class="progress-label">BONUS IN</div>
+      <div class="progress-dots">
+        <div class="pdot" id="pd-p1-0"></div>
+        <div class="pdot" id="pd-p1-1"></div>
+        <div class="pdot" id="pd-p1-2"></div>
+        <div class="pdot" id="pd-p1-3"></div>
+        <div class="pdot" id="pd-p1-4"></div>
+      </div>
+    </div>
+
+    <div class="stop-row">
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p1-0" onclick="stopReel('p1',0)" disabled>STOP 1</button></div>
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p1-1" onclick="stopReel('p1',1)" disabled>STOP 2</button></div>
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p1-2" onclick="stopReel('p1',2)" disabled>STOP 3</button></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="start-p1" onclick="startSpin('p1')">&#9654; START</button>
+      <button class="btn btn-stop-all" id="stopall-p1" onclick="stopAll('p1')" disabled>&#9632; STOP ALL</button>
     </div>
   </div>
 
-  <div class="result-strip" id="result">PRESS START</div>
-
-  <div class="stats-row">
-    <div class="stat-box"><div class="stat-label">SPINS</div><div class="stat-value" id="spin-count">0</div></div>
-    <div class="stat-box"><div class="stat-label">THIS SPIN</div><div class="stat-value" id="last-pts">&#8212;</div></div>
-    <div class="stat-box"><div class="stat-label">BONUS</div><div class="stat-value" id="bonus-status">&#8212;</div></div>
+  <!-- VS COLUMN -->
+  <div class="scoreboard">
+    <div class="vs-label">VS</div>
+    <div class="score-divider"></div>
+    <div class="turn-arrow p1" id="turn-arrow">&#9660;</div>
+    <div class="score-divider"></div>
   </div>
 
-  <div class="spin-progress">
-    <div class="progress-label">NEXT BONUS IN</div>
-    <div class="progress-dots">
-      <div class="pdot" id="pd0"></div>
-      <div class="pdot" id="pd1"></div>
-      <div class="pdot" id="pd2"></div>
-      <div class="pdot" id="pd3"></div>
-      <div class="pdot" id="pd4"></div>
+  <!-- PLAYER 2 -->
+  <div class="machine p2 inactive" id="machine-p2">
+    <div class="player-header">
+      <div class="player-name">PLAYER 2</div>
+      <div class="player-pts-wrap">
+        <div class="pts-label">POINTS</div>
+        <div class="pts-value" id="pts-p2">0</div>
+      </div>
+    </div>
+
+    <div class="turn-banner" id="turn-p2">WAITING...</div>
+
+    <div class="reels-container">
+      <div class="reel-col">
+        <span class="reel-label">COL 1</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p2-0"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p2-0"></div>
+      </div>
+      <div class="reel-divider"></div>
+      <div class="reel-col">
+        <span class="reel-label">COL 2</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p2-1"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p2-1"></div>
+      </div>
+      <div class="reel-divider"></div>
+      <div class="reel-col">
+        <span class="reel-label">COL 3</span>
+        <div class="reel-window">
+          <div class="reel-line"></div>
+          <div class="reel-track" id="reel-p2-2"></div>
+        </div>
+        <div class="stop-indicator" id="ind-p2-2"></div>
+      </div>
+    </div>
+
+    <div class="result-strip" id="result-p2">WAITING...</div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-label">SPINS</div><div class="stat-value" id="spins-p2">0</div></div>
+      <div class="stat-box"><div class="stat-label">THIS SPIN</div><div class="stat-value" id="last-p2">&#8212;</div></div>
+      <div class="stat-box"><div class="stat-label">BONUS</div><div class="stat-value" id="bonus-p2">&#8212;</div></div>
+    </div>
+
+    <div class="spin-progress">
+      <div class="progress-label">BONUS IN</div>
+      <div class="progress-dots">
+        <div class="pdot" id="pd-p2-0"></div>
+        <div class="pdot" id="pd-p2-1"></div>
+        <div class="pdot" id="pd-p2-2"></div>
+        <div class="pdot" id="pd-p2-3"></div>
+        <div class="pdot" id="pd-p2-4"></div>
+      </div>
+    </div>
+
+    <div class="stop-row">
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p2-0" onclick="stopReel('p2',0)" disabled>STOP 1</button></div>
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p2-1" onclick="stopReel('p2',1)" disabled>STOP 2</button></div>
+      <div class="btn-stop-col"><button class="btn btn-stop-s" id="stop-p2-2" onclick="stopReel('p2',2)" disabled>STOP 3</button></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="start-p2" onclick="startSpin('p2')" disabled>&#9654; START</button>
+      <button class="btn btn-stop-all" id="stopall-p2" onclick="stopAll('p2')" disabled>&#9632; STOP ALL</button>
     </div>
   </div>
 
-  <div class="stop-row">
-    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-0" onclick="stopReel(0)" disabled>STOP 1</button></div>
-    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-1" onclick="stopReel(1)" disabled>STOP 2</button></div>
-    <div class="btn-stop-col"><button class="btn btn-stop-s" id="btn-stop-2" onclick="stopReel(2)" disabled>STOP 3</button></div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-start" id="btn-start" onclick="startAll()">&#9654; START</button>
-    <button class="btn btn-stop-all" id="btn-stop-all" onclick="stopAll()" disabled>&#9632; STOP ALL</button>
-  </div>
 </div>
 
 <script>
-/*
-  APPROACH: Each reel is rendered as a simple canvas-like system.
-  We maintain a floating "topDigit" (can be fractional during spin).
-  We always draw 3 visible digits: topDigit-1, topDigit, topDigit+1,
-  positioned relative to the window centre.
-
-  TOP-TO-BOTTOM spin: topDigit INCREASES over time.
-  So the sequence seen in the window goes: 0,1,2,3,4,5,6,7,8,9,0,1,...
-  Each digit enters from the TOP and exits through the BOTTOM.
-*/
-
-  const CELL   = 110;   // px — must match CSS height of .reel-digit and .reel-window
+  const CELL   = 96;
   const DIGITS = 10;
-  const SPEED  = 0.12;  // fractional digits per frame (~7.2 digits/sec at 60fps)
+  const SPEED  = 0.13;
 
-  // State per reel: topDigit is a float; integer part = which digit is at top of window
-  let reels = [
-    { top: 0, spinning: false, raf: null, settled: 0 },
-    { top: 0, spinning: false, raf: null, settled: 0 },
-    { top: 0, spinning: false, raf: null, settled: 0 },
-  ];
+  const players = {
+    p1: { reels:[{top:0,spinning:false,raf:null,settled:0},{top:0,spinning:false,raf:null,settled:0},{top:0,spinning:false,raf:null,settled:0}], points:0, spinCount:0, pendingBonus:false, stoppedCount:0 },
+    p2: { reels:[{top:0,spinning:false,raf:null,settled:0},{top:0,spinning:false,raf:null,settled:0},{top:0,spinning:false,raf:null,settled:0}], points:0, spinCount:0, pendingBonus:false, stoppedCount:0 },
+  };
 
-  let totalPoints = 0, spinCount = 0;
-  let bonusActive = null, pendingBonus = false;
-  let forcedDigit = -1; // when >= 0, all reels snap to this digit (guaranteed match)
+  let currentPlayer = 'p1';
+  let modalPlayer   = null;
 
-  /* ── BUILD: put 3 digit divs per reel, we reposition them in JS ── */
-  function buildReels() {
-    for (let i = 0; i < 3; i++) {
-      const track = document.getElementById('reel-' + i);
-      track.innerHTML = '';
-      // create enough cells to always cover the window
-      // we'll use 5 cells and reuse them
-      for (let k = 0; k < 5; k++) {
-        const el = document.createElement('div');
-        el.className = 'reel-digit';
-        el.id = 'cell-' + i + '-' + k;
-        track.appendChild(el);
+  /* BUILD */
+  function buildAllReels() {
+    ['p1','p2'].forEach(p => {
+      for (let i = 0; i < 3; i++) {
+        const track = document.getElementById('reel-' + p + '-' + i);
+        track.innerHTML = '';
+        for (let k = 0; k < 5; k++) {
+          const el = document.createElement('div');
+          el.className = 'reel-digit';
+          el.id = 'cell-' + p + '-' + i + '-' + k;
+          track.appendChild(el);
+        }
+        renderReel(p, i);
       }
-      reels[i].top     = 0;
-      reels[i].settled = 0;
-      renderReel(i);
-    }
+    });
   }
 
-  /*
-    renderReel: given reels[i].top (float), position 5 cells so the window
-    always shows smooth scrolling digits falling top→bottom.
-
-    Window centre = CELL/2 = 55px from top of .reel-window.
-    The digit at integer position Math.floor(top) should appear at:
-      y = -(top % 1) * CELL   (0 when top is exact integer = digit centred)
-    Digit at position floor(top)+k is at y + k*CELL.
-    We show cells for k = -2 .. +2 (5 cells total).
-  */
-  function renderReel(idx) {
-    const track = document.getElementById('reel-' + idx);
-    const t     = reels[idx].top;
-    const base  = Math.floor(t);       // integer digit index at top of window
-    const frac  = t - base;            // 0..1, how far we've scrolled into next digit
-
-    // y offset of the 'base' digit cell (it starts at top of window and moves down)
-    // When frac=0: base digit is at y=0 (top of window, entering from top)
-    // As frac→1: base digit moves to y=CELL (exits bottom), next digit enters
-    const baseY = frac * CELL;   // positive = moves DOWN = top-to-bottom
-
+  /* RENDER */
+  function renderReel(p, idx) {
+    const t    = players[p].reels[idx].top;
+    const base = Math.floor(t);
+    const frac = t - base;
+    const baseY = frac * CELL;
     for (let k = 0; k < 5; k++) {
-      // k=0 is 2 cells above centre, k=2 is centre, k=4 is 2 below
-      const cellOffset = k - 2;  // -2, -1, 0, 1, 2
-      const digitIdx   = ((base + cellOffset) % DIGITS + DIGITS) % DIGITS;
-      const y          = baseY + cellOffset * CELL;
-
-      const el = document.getElementById('cell-' + idx + '-' + k);
-      el.textContent     = digitIdx;
-      el.style.position  = 'absolute';
-      el.style.top       = y + 'px';
-      el.style.left      = '0';
-      el.style.width     = '92px';
-      el.style.height    = CELL + 'px';
+      const off      = k - 2;
+      const digitIdx = ((base + off) % DIGITS + DIGITS) % DIGITS;
+      const y        = baseY + off * CELL;
+      const el = document.getElementById('cell-' + p + '-' + idx + '-' + k);
+      el.textContent    = digitIdx;
+      el.style.position = 'absolute';
+      el.style.top      = y + 'px';
+      el.style.left     = '0';
+      el.style.width    = '80px';
+      el.style.height   = CELL + 'px';
     }
   }
 
-  /* ── SPIN ── */
-  function startSpin(idx) {
-    reels[idx].spinning = true;
-
-    function tick() {
-      if (!reels[idx].spinning) return;
-      reels[idx].top += SPEED;
-      // keep top from growing forever
-      if (reels[idx].top > DIGITS * 100) reels[idx].top -= DIGITS;
-      renderReel(idx);
-      reels[idx].raf = requestAnimationFrame(tick);
-    }
-    tick();
+  /* SPIN TICK */
+  function spinTick(p, idx) {
+    if (!players[p].reels[idx].spinning) return;
+    players[p].reels[idx].top += SPEED;
+    if (players[p].reels[idx].top > DIGITS * 100) players[p].reels[idx].top -= DIGITS;
+    renderReel(p, idx);
+    players[p].reels[idx].raf = requestAnimationFrame(() => spinTick(p, idx));
   }
 
-  /* ── STOP: snap to nearest integer digit ── */
-  function stopReel(idx) {
-    if (!reels[idx].spinning) return;
-    reels[idx].spinning = false;
-    cancelAnimationFrame(reels[idx].raf);
+  /* STOP ONE REEL — purely random snap, no forcing */
+  function stopReel(p, idx) {
+    const r = players[p].reels[idx];
+    if (!r.spinning) return;
+    r.spinning = false;
+    cancelAnimationFrame(r.raf);
 
-    let snapped, digit;
+    const snapped = Math.round(r.top);
+    const digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
+    r.settled = digit;
+    r.top     = snapped;
 
-    if (forcedDigit >= 0) {
-      // On every 5th spin: force all reels to the same (or paired) digit
-      // reel 0 and 1 always match; reel 2 matches too (all 3 same) for max reward
-      digit   = forcedDigit;
-      // find the nearest snapped value that gives this digit
-      const base = Math.round(reels[idx].top);
-      const baseDigit = ((base % DIGITS) + DIGITS) % DIGITS;
-      const diff = ((digit - baseDigit) + DIGITS) % DIGITS;
-      snapped = base + diff; // nudge forward to hit the forced digit
-    } else {
-      snapped = Math.round(reels[idx].top);
-      digit   = ((snapped % DIGITS) + DIGITS) % DIGITS;
-    }
-
-    animateSnap(idx, reels[idx].top, snapped, digit);
-  }
-
-  function animateSnap(idx, from, to, digit) {
-    const duration = 300; // ms
-    const start    = performance.now();
+    const dur   = 260;
+    const from  = r.top;
+    const start = performance.now();
 
     function step(now) {
-      const p = Math.min((now - start) / duration, 1);
-      // ease out cubic
-      const ease = 1 - Math.pow(1 - p, 3);
-      reels[idx].top = from + (to - from) * ease;
-      renderReel(idx);
-
-      if (p < 1) {
-        reels[idx].raf = requestAnimationFrame(step);
+      const prog = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - prog, 3);
+      players[p].reels[idx].top = from + (snapped - from) * ease;
+      renderReel(p, idx);
+      if (prog < 1) {
+        players[p].reels[idx].raf = requestAnimationFrame(step);
       } else {
-        reels[idx].top     = to;
-        reels[idx].settled = digit;
-        renderReel(idx);
-        document.getElementById('ind-' + idx).classList.add('stopped');
-        document.getElementById('btn-stop-' + idx).disabled = true;
-        checkDone();
+        players[p].reels[idx].top = snapped;
+        renderReel(p, idx);
+        document.getElementById('ind-' + p + '-' + idx).classList.add('stopped');
+        document.getElementById('stop-' + p + '-' + idx).disabled = true;
+        players[p].stoppedCount++;
+        if (players[p].stoppedCount === 3) {
+          scoreAndContinue(p);
+        }
       }
     }
     requestAnimationFrame(step);
   }
 
-  function stopAll() { for (let i = 0; i < 3; i++) stopReel(i); }
-
-  /* ── START ── */
-  function startAll() {
-    if (pendingBonus) return;
-
-    spinCount++;
-    document.getElementById('spin-count').textContent = spinCount;
-    document.getElementById('last-pts').textContent   = '—';
-    document.getElementById('last-pts').style.color   = '';
-
-    // Every 5th spin: pick a random forced digit so reels guaranteed match
-    if (spinCount % 5 === 0) {
-      forcedDigit = Math.floor(Math.random() * DIGITS);
-    } else {
-      forcedDigit = -1;
-    }
-
-    for (let i = 0; i < 3; i++) {
-      document.getElementById('ind-' + i).classList.remove('stopped');
-      document.getElementById('btn-stop-' + i).disabled = false;
-    }
-    document.getElementById('btn-start').disabled    = true;
-    document.getElementById('btn-stop-all').disabled = false;
-
-    const res = document.getElementById('result');
-    res.textContent = 'SPINNING...';
-    res.className   = 'result-strip spinning';
-
-    updateDots();
-    for (let i = 0; i < 3; i++) startSpin(i);
+  function stopAll(p) {
+    for (let i = 0; i < 3; i++) stopReel(p, i);
   }
 
-  /* ── SCORE ── */
-  function checkDone() {
-    if (reels.some(r => r.spinning)) return;
-    // also wait for snap animations
-    for (let i = 0; i < 3; i++) {
-      if (reels[i].raf) {
-        // still animating — checkDone will be called again after snap finishes
-        if (reels.filter(r => !r.spinning).length < 3) return;
-      }
-    }
+  /* SCORE — called exactly once when all 3 reels done */
+  function scoreAndContinue(p) {
+    document.getElementById('stopall-' + p).disabled = true;
 
-    document.getElementById('btn-stop-all').disabled = true;
-    document.getElementById('btn-start').disabled    = false;
-    forcedDigit = -1; // reset after results are read
-
-    const vals    = reels.map(r => r.settled);
+    const vals    = players[p].reels.map(r => r.settled);
     const allSame = vals[0] === vals[1] && vals[1] === vals[2];
     const anyPair = vals[0] === vals[1] || vals[1] === vals[2] || vals[0] === vals[2];
 
     let pts = 0, label = '', cls = 'zero';
-
     if (allSame) {
       pts = 100; cls = 'win100';
-      label = vals.join('  ·  ') + '  —  +100 PTS  ★';
+      label = vals.join(' · ') + '  —  +100 PTS ★';
     } else if (anyPair) {
       pts = 50; cls = 'win50';
-      label = vals.join('  ·  ') + '  —  +50 PTS';
+      label = vals.join(' · ') + '  —  +50 PTS';
     } else {
-        pts = 0; cls = 'zero';
-        label = vals.join('  ·  ') + '  —  0 PTS';
+      pts = 0; cls = 'zero';
+      label = vals.join(' · ') + '  —  0 PTS';
     }
 
+    players[p].points += pts;
+    document.getElementById('pts-' + p).textContent    = players[p].points;
+    document.getElementById('last-' + p).textContent   = pts > 0 ? '+' + pts : '0';
+    document.getElementById('last-' + p).style.color   = pts > 0 ? (p === 'p1' ? 'var(--gold)' : 'var(--blue)') : 'var(--text-dim)';
+    document.getElementById('result-' + p).textContent = label;
+    document.getElementById('result-' + p).className   = 'result-strip ' + cls;
 
-    totalPoints += pts;
-
-    document.getElementById('last-pts').textContent = pts > 0 ? '+' + pts : '0';
-    document.getElementById('last-pts').style.color = pts > 0 ? 'var(--gold)' : 'var(--text-dim)';
-
-    const pEl = document.getElementById('pts-value');
-    pEl.textContent = totalPoints;
-    pEl.classList.remove('bump');
-    void pEl.offsetWidth;
+    const pEl = document.getElementById('pts-' + p);
+    pEl.classList.remove('bump'); void pEl.offsetWidth;
     if (pts > 0) pEl.classList.add('bump');
 
-    const res = document.getElementById('result');
-    res.textContent = label;
-    res.className   = 'result-strip ' + cls;
-
     if (allSame) {
-      const wf = document.getElementById('win-flash');
-      wf.classList.remove('active'); void wf.offsetWidth;
-      wf.classList.add('active');
+      const wf = document.getElementById('win-flash-' + p);
+      wf.classList.remove('active'); void wf.offsetWidth; wf.classList.add('active');
     }
 
-    if (spinCount % 5 === 0) {
-      pendingBonus = true;
-      document.getElementById('btn-start').disabled = true;
-      setTimeout(() => document.getElementById('modal').classList.add('visible'), 800);
+    /* Every 5th spin → bonus modal, else switch turn */
+    if (players[p].spinCount % 5 === 0) {
+      players[p].pendingBonus = true;
+      setTimeout(() => showBonusModal(p), 700);
+    } else {
+      setTimeout(() => switchTurn(p), 600);
     }
   }
 
-  /* ── BONUS ── */
+  /* START */
+  function startSpin(p) {
+    if (p !== currentPlayer) return;
+    if (players[p].pendingBonus) return;
+
+    players[p].spinCount++;
+    players[p].stoppedCount = 0;
+    document.getElementById('spins-' + p).textContent = players[p].spinCount;
+    document.getElementById('last-' + p).textContent  = '—';
+    document.getElementById('last-' + p).style.color  = '';
+
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('ind-' + p + '-' + i).classList.remove('stopped');
+      document.getElementById('stop-' + p + '-' + i).disabled = false;
+    }
+    document.getElementById('start-' + p).disabled   = true;
+    document.getElementById('stopall-' + p).disabled = false;
+    document.getElementById('result-' + p).textContent = 'SPINNING...';
+    document.getElementById('result-' + p).className   = 'result-strip spinning';
+
+    updateDots(p);
+    for (let i = 0; i < 3; i++) {
+      players[p].reels[i].spinning = true;
+      players[p].reels[i].raf = requestAnimationFrame(() => spinTick(p, i));
+    }
+  }
+
+  /* SWITCH TURN */
+  function switchTurn(donePlayer) {
+    const next = donePlayer === 'p1' ? 'p2' : 'p1';
+    currentPlayer = next;
+    document.getElementById('machine-p1').className = 'machine p1' + (next === 'p1' ? ' active-p1' : ' inactive');
+    document.getElementById('machine-p2').className = 'machine p2' + (next === 'p2' ? ' active-p2' : ' inactive');
+    document.getElementById('turn-p1').textContent  = next === 'p1' ? 'YOUR TURN' : 'WAITING...';
+    document.getElementById('turn-p2').textContent  = next === 'p2' ? 'YOUR TURN' : 'WAITING...';
+    document.getElementById('turn-arrow').className = 'turn-arrow ' + next;
+    document.getElementById('start-p1').disabled    = next !== 'p1';
+    document.getElementById('start-p2').disabled    = next !== 'p2';
+  }
+
+  /* BONUS MODAL */
+  function showBonusModal(p) {
+    modalPlayer = p;
+    const isP1  = p === 'p1';
+    document.getElementById('modal-box').className         = 'modal-box ' + (isP1 ? 'p1-modal' : 'p2-modal');
+    document.getElementById('modal-badge').textContent     = 'Every 5 Spins — ' + (isP1 ? 'Player 1' : 'Player 2') + ' Bonus';
+    document.getElementById('modal-sub').innerHTML         = "You've completed 5 spins, " + (isP1 ? 'Player 1' : 'Player 2') + '!<br>Pick one bonus to add to your score.';
+    document.getElementById('opt1-pts').style.color        = isP1 ? 'var(--gold)' : 'var(--blue)';
+    document.getElementById('modal').classList.add('visible');
+  }
+
   function chooseBonus(opt) {
-    document.getElementById('modal').classList.remove('visible');
-    pendingBonus = false;
-    bonusActive  = null;
-
+    const p        = modalPlayer;
     const bonusPts = opt === 1 ? 100 : 50;
-    totalPoints += bonusPts;
+    document.getElementById('modal').classList.remove('visible');
+    players[p].pendingBonus = false;
+    modalPlayer = null;
 
-    // Animate points bump
-    const pEl = document.getElementById('pts-value');
-    pEl.textContent = totalPoints;
-    pEl.classList.remove('bump');
-    void pEl.offsetWidth;
-    pEl.classList.add('bump');
+    players[p].points += bonusPts;
+    const pEl = document.getElementById('pts-' + p);
+    pEl.textContent = players[p].points;
+    pEl.classList.remove('bump'); void pEl.offsetWidth; pEl.classList.add('bump');
 
-    // Show bonus awarded in result strip
-    const res = document.getElementById('result');
-    res.textContent = 'BONUS CLAIMED!  +' + bonusPts + ' PTS';
-    res.className   = 'result-strip win' + (opt === 1 ? '100' : '50');
+    document.getElementById('result-' + p).textContent = 'BONUS CLAIMED!  +' + bonusPts + ' PTS';
+    document.getElementById('result-' + p).className   = 'result-strip ' + (opt === 1 ? 'win100' : 'win50');
+    document.getElementById('bonus-' + p).textContent  = '+' + bonusPts;
+    document.getElementById('bonus-' + p).style.color  = opt === 1 ? (p === 'p1' ? 'var(--gold)' : 'var(--blue)') : '#aaa';
 
-    document.getElementById('bonus-status').textContent = '+' + bonusPts;
-    document.getElementById('bonus-status').style.color = opt === 1 ? 'var(--gold)' : '#aaa';
-
-    document.getElementById('btn-start').disabled = false;
-    for (let i = 0; i < 5; i++) document.getElementById('pd' + i).classList.remove('filled');
+    for (let i = 0; i < 5; i++) document.getElementById('pd-' + p + '-' + i).classList.remove('filled');
+    setTimeout(() => switchTurn(p), 600);
   }
 
-  /* ── DOTS ── */
-  function updateDots() {
-    const pos = (spinCount - 1) % 5;
+  /* DOTS */
+  function updateDots(p) {
+    const pos = (players[p].spinCount - 1) % 5;
     for (let i = 0; i < 5; i++) {
-      document.getElementById('pd' + i).classList.toggle('filled', i <= pos);
+      document.getElementById('pd-' + p + '-' + i).classList.toggle('filled', i <= pos);
     }
   }
 
-  buildReels();
+  /* RESET */
+  function resetGame() {
+    document.getElementById('winner-banner').classList.remove('visible');
+    ['p1','p2'].forEach(p => {
+      players[p].points = 0; players[p].spinCount = 0;
+      players[p].stoppedCount = 0; players[p].pendingBonus = false;
+      players[p].reels.forEach(r => { r.top=0; r.spinning=false; r.settled=0; cancelAnimationFrame(r.raf); });
+      document.getElementById('pts-' + p).textContent    = '0';
+      document.getElementById('spins-' + p).textContent  = '0';
+      document.getElementById('last-' + p).textContent   = '—';
+      document.getElementById('bonus-' + p).textContent  = '—';
+      document.getElementById('result-' + p).textContent = p === 'p1' ? 'PRESS START' : 'WAITING...';
+      document.getElementById('result-' + p).className   = 'result-strip';
+      for (let i = 0; i < 3; i++) {
+        document.getElementById('ind-' + p + '-' + i).classList.remove('stopped');
+        document.getElementById('stop-' + p + '-' + i).disabled = true;
+        document.getElementById('stopall-' + p).disabled = true;
+      }
+      for (let i = 0; i < 5; i++) document.getElementById('pd-' + p + '-' + i).classList.remove('filled');
+    });
+    currentPlayer = 'p1';
+    document.getElementById('start-p1').disabled = false;
+    document.getElementById('start-p2').disabled = true;
+    document.getElementById('machine-p1').className = 'machine p1 active-p1';
+    document.getElementById('machine-p2').className = 'machine p2 inactive';
+    document.getElementById('turn-p1').textContent  = 'YOUR TURN';
+    document.getElementById('turn-p2').textContent  = 'WAITING...';
+    document.getElementById('turn-arrow').className = 'turn-arrow p1';
+    buildAllReels();
+  }
+
+  buildAllReels();
 </script>
 </body>
 </html>
