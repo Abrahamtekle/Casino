@@ -53,14 +53,8 @@ body::before{
   font-family:'Orbitron',monospace;font-weight:900;
   z-index:30;opacity:0;transform:scale(0);pointer-events:none;
 }
-.machine.p1 .award-badge{
-  background:radial-gradient(circle at 35% 35%,#ffe680,#f5c542,#b8850a);
-  box-shadow:0 0 22px rgba(245,197,66,1),0 0 44px rgba(245,197,66,.5);color:#5a3a00;
-}
-.machine.p2 .award-badge{
-  background:radial-gradient(circle at 35% 35%,#a8e6ff,#4fc3f7,#0e6a96);
-  box-shadow:0 0 22px rgba(79,195,247,1),0 0 44px rgba(79,195,247,.5);color:#003a52;
-}
+.machine.p1 .award-badge{background:radial-gradient(circle at 35% 35%,#ffe680,#f5c542,#b8850a);box-shadow:0 0 22px rgba(245,197,66,1),0 0 44px rgba(245,197,66,.5);color:#5a3a00;}
+.machine.p2 .award-badge{background:radial-gradient(circle at 35% 35%,#a8e6ff,#4fc3f7,#0e6a96);box-shadow:0 0 22px rgba(79,195,247,1),0 0 44px rgba(79,195,247,.5);color:#003a52;}
 .award-badge .ab-pts{font-size:13px;line-height:1;}
 .award-badge .ab-lbl{font-size:7px;letter-spacing:1px;margin-top:2px;}
 .award-badge.pop{animation:badgePop 2.4s cubic-bezier(.22,1,.36,1) forwards;}
@@ -88,11 +82,7 @@ body::before{
 .reels{display:flex;gap:8px;align-items:center;}
 .reel-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .reel-lbl{font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
-.reel-win{
-  width:80px;height:96px;background:#0a0a0a;
-  border:1.5px solid var(--border);border-radius:10px;
-  overflow:hidden;position:relative;box-shadow:inset 0 4px 16px rgba(0,0,0,.9);
-}
+.reel-win{width:80px;height:96px;background:#0a0a0a;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;position:relative;box-shadow:inset 0 4px 16px rgba(0,0,0,.9);}
 .reel-win::before,.reel-win::after{content:'';position:absolute;left:0;right:0;height:24px;z-index:2;pointer-events:none;}
 .reel-win::before{top:0;background:linear-gradient(to bottom,#0a0a0a,transparent);}
 .reel-win::after{bottom:0;background:linear-gradient(to top,#0a0a0a,transparent);}
@@ -100,11 +90,7 @@ body::before{
 .machine.p1 .reel-line{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
 .machine.p2 .reel-line{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
 .reel-track{position:absolute;top:0;left:0;width:100%;will-change:transform;}
-.reel-digit{
-  width:80px;height:96px;display:flex;align-items:center;justify-content:center;
-  font-family:'Orbitron',monospace;font-size:38px;font-weight:900;
-  color:var(--text);flex-shrink:0;user-select:none;
-}
+.reel-digit{width:80px;height:96px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:38px;font-weight:900;color:var(--text);flex-shrink:0;user-select:none;}
 .reel-div{width:1px;height:96px;background:var(--border);opacity:.3;}
 .stop-dot{width:5px;height:5px;border-radius:50%;background:var(--border);transition:background .3s,box-shadow .3s;}
 .machine.p1 .stop-dot.on{background:var(--gold);box-shadow:0 0 5px var(--gold);}
@@ -147,7 +133,6 @@ body::before{
 .machine.p2 .btn-start{border-color:var(--green);color:var(--green);background:rgba(0,184,148,.08);}
 .machine.p2 .btn-stops{border-color:var(--blue2);color:var(--blue);background:rgba(79,195,247,.06);}
 .machine.p2 .btn-stopall{border-color:var(--red);color:var(--red);background:rgba(214,48,49,.08);}
-/* CASHOUT */
 .cash-balance{
   width:100%;background:#0a110e;border:1px solid rgba(0,184,148,.25);border-radius:7px;
   padding:6px 12px;display:flex;align-items:center;justify-content:space-between;
@@ -169,7 +154,6 @@ body::before{
 .btn-cashout:disabled{opacity:.18;cursor:not-allowed;}
 .btn-cashout.flash{animation:coFlash .45s ease;}
 @keyframes coFlash{0%,100%{box-shadow:0 0 14px rgba(0,184,148,.2);}50%{box-shadow:0 0 44px rgba(0,184,148,.95),0 0 80px rgba(0,184,148,.4);}}
-/* WIN FLASH */
 .wflash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:50;}
 .wflash.p1{background:rgba(245,197,66,.05);}
 .wflash.p2{background:rgba(79,195,247,.05);}
@@ -184,36 +168,18 @@ body::before{
 
   <!-- PLAYER 1 -->
   <div class="machine p1 on" id="machine-p1">
-    <div class="award-badge" id="badge-p1">
-      <div class="ab-pts" id="badge-pts-p1">+100</div>
-      <div class="ab-lbl">PTS</div>
-    </div>
+    <div class="award-badge" id="badge-p1"><div class="ab-pts" id="badge-pts-p1">+100</div><div class="ab-lbl">PTS</div></div>
     <div class="p-header">
       <div class="p-name">PLAYER 1</div>
-      <div class="p-pts-wrap">
-        <div class="p-pts-lbl">POINTS</div>
-        <div class="p-pts-val" id="pts-p1">0</div>
-      </div>
+      <div class="p-pts-wrap"><div class="p-pts-lbl">POINTS</div><div class="p-pts-val" id="pts-p1">0</div></div>
     </div>
     <div class="turn-banner" id="turn-p1">YOUR TURN</div>
     <div class="reels">
-      <div class="reel-col">
-        <span class="reel-lbl">COL 1</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-0"></div></div>
-        <div class="stop-dot" id="sd-p1-0"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 1</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-0"></div></div><div class="stop-dot" id="sd-p1-0"></div></div>
       <div class="reel-div"></div>
-      <div class="reel-col">
-        <span class="reel-lbl">COL 2</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-1"></div></div>
-        <div class="stop-dot" id="sd-p1-1"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 2</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-1"></div></div><div class="stop-dot" id="sd-p1-1"></div></div>
       <div class="reel-div"></div>
-      <div class="reel-col">
-        <span class="reel-lbl">COL 3</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-2"></div></div>
-        <div class="stop-dot" id="sd-p1-2"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 3</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p1-2"></div></div><div class="stop-dot" id="sd-p1-2"></div></div>
     </div>
     <div class="result" id="res-p1">PRESS START</div>
     <div class="stats">
@@ -223,10 +189,7 @@ body::before{
     </div>
     <div class="dots-row">
       <div class="dots-lbl">BONUS IN</div>
-      <div class="dots" id="dots-p1">
-        <div class="dot" id="d-p1-0"></div><div class="dot" id="d-p1-1"></div>
-        <div class="dot" id="d-p1-2"></div><div class="dot" id="d-p1-3"></div><div class="dot" id="d-p1-4"></div>
-      </div>
+      <div class="dots"><div class="dot" id="d-p1-0"></div><div class="dot" id="d-p1-1"></div><div class="dot" id="d-p1-2"></div><div class="dot" id="d-p1-3"></div><div class="dot" id="d-p1-4"></div></div>
     </div>
     <div class="stop-row">
       <button class="btn btn-stops" id="bs-p1-0" onclick="stopOne('p1',0)" disabled>STOP 1</button>
@@ -234,16 +197,11 @@ body::before{
       <button class="btn btn-stops" id="bs-p1-2" onclick="stopOne('p1',2)" disabled>STOP 3</button>
     </div>
     <div class="btn-row">
-      <button class="btn btn-start"   id="bstart-p1"   onclick="doStart('p1')">&#9654; START</button>
+      <button class="btn btn-start" id="bstart-p1" onclick="doStart('p1')">&#9654; START</button>
       <button class="btn btn-stopall" id="bstopall-p1" onclick="stopAll('p1')" disabled>&#9632; STOP ALL</button>
     </div>
-    <div class="cash-balance">
-      <div class="cash-lbl">CASH BALANCE</div>
-      <div class="cash-val" id="cash-p1">$0</div>
-    </div>
-    <button class="btn-cashout" id="bcash-p1" onclick="doCashout('p1')" disabled>
-      CASH OUT &mdash; NEED 100+ PTS
-    </button>
+    <div class="cash-balance"><div class="cash-lbl">CASH BALANCE</div><div class="cash-val" id="cash-p1">$0</div></div>
+    <button class="btn-cashout" id="bcash-p1" onclick="doCashout('p1')" disabled>CASH OUT &mdash; NEED 99.9+ PTS</button>
   </div>
 
   <!-- VS -->
@@ -256,36 +214,18 @@ body::before{
 
   <!-- PLAYER 2 -->
   <div class="machine p2 off" id="machine-p2">
-    <div class="award-badge" id="badge-p2">
-      <div class="ab-pts" id="badge-pts-p2">+100</div>
-      <div class="ab-lbl">PTS</div>
-    </div>
+    <div class="award-badge" id="badge-p2"><div class="ab-pts" id="badge-pts-p2">+100</div><div class="ab-lbl">PTS</div></div>
     <div class="p-header">
       <div class="p-name">PLAYER 2</div>
-      <div class="p-pts-wrap">
-        <div class="p-pts-lbl">POINTS</div>
-        <div class="p-pts-val" id="pts-p2">0</div>
-      </div>
+      <div class="p-pts-wrap"><div class="p-pts-lbl">POINTS</div><div class="p-pts-val" id="pts-p2">0</div></div>
     </div>
     <div class="turn-banner" id="turn-p2">WAITING...</div>
     <div class="reels">
-      <div class="reel-col">
-        <span class="reel-lbl">COL 1</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-0"></div></div>
-        <div class="stop-dot" id="sd-p2-0"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 1</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-0"></div></div><div class="stop-dot" id="sd-p2-0"></div></div>
       <div class="reel-div"></div>
-      <div class="reel-col">
-        <span class="reel-lbl">COL 2</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-1"></div></div>
-        <div class="stop-dot" id="sd-p2-1"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 2</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-1"></div></div><div class="stop-dot" id="sd-p2-1"></div></div>
       <div class="reel-div"></div>
-      <div class="reel-col">
-        <span class="reel-lbl">COL 3</span>
-        <div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-2"></div></div>
-        <div class="stop-dot" id="sd-p2-2"></div>
-      </div>
+      <div class="reel-col"><span class="reel-lbl">COL 3</span><div class="reel-win"><div class="reel-line"></div><div class="reel-track" id="rt-p2-2"></div></div><div class="stop-dot" id="sd-p2-2"></div></div>
     </div>
     <div class="result" id="res-p2">WAITING...</div>
     <div class="stats">
@@ -295,10 +235,7 @@ body::before{
     </div>
     <div class="dots-row">
       <div class="dots-lbl">BONUS IN</div>
-      <div class="dots" id="dots-p2">
-        <div class="dot" id="d-p2-0"></div><div class="dot" id="d-p2-1"></div>
-        <div class="dot" id="d-p2-2"></div><div class="dot" id="d-p2-3"></div><div class="dot" id="d-p2-4"></div>
-      </div>
+      <div class="dots"><div class="dot" id="d-p2-0"></div><div class="dot" id="d-p2-1"></div><div class="dot" id="d-p2-2"></div><div class="dot" id="d-p2-3"></div><div class="dot" id="d-p2-4"></div></div>
     </div>
     <div class="stop-row">
       <button class="btn btn-stops" id="bs-p2-0" onclick="stopOne('p2',0)" disabled>STOP 1</button>
@@ -306,121 +243,81 @@ body::before{
       <button class="btn btn-stops" id="bs-p2-2" onclick="stopOne('p2',2)" disabled>STOP 3</button>
     </div>
     <div class="btn-row">
-      <button class="btn btn-start"   id="bstart-p2"   onclick="doStart('p2')" disabled>&#9654; START</button>
+      <button class="btn btn-start" id="bstart-p2" onclick="doStart('p2')" disabled>&#9654; START</button>
       <button class="btn btn-stopall" id="bstopall-p2" onclick="stopAll('p2')" disabled>&#9632; STOP ALL</button>
     </div>
-    <div class="cash-balance">
-      <div class="cash-lbl">CASH BALANCE</div>
-      <div class="cash-val" id="cash-p2">$0</div>
-    </div>
-    <button class="btn-cashout" id="bcash-p2" onclick="doCashout('p2')" disabled>
-      CASH OUT &mdash; NEED 100+ PTS
-    </button>
+    <div class="cash-balance"><div class="cash-lbl">CASH BALANCE</div><div class="cash-val" id="cash-p2">$0</div></div>
+    <button class="btn-cashout" id="bcash-p2" onclick="doCashout('p2')" disabled>CASH OUT &mdash; NEED 99.9+ PTS</button>
   </div>
 
 </div>
 <script>
-const CELL=96,DIGITS=10,SPEED=0.13;
+const CELL=96,DIGITS=10,SPEED=0.13,CASHOUT_THRESHOLD=99.9;
 const G={
   p1:{reel:[{top:0,spin:false,raf:null,val:0},{top:0,spin:false,raf:null,val:0},{top:0,spin:false,raf:null,val:0}],pts:0,spins:0,stopped:0,isFive:false,cash:0},
   p2:{reel:[{top:0,spin:false,raf:null,val:0},{top:0,spin:false,raf:null,val:0},{top:0,spin:false,raf:null,val:0}],pts:0,spins:0,stopped:0,isFive:false,cash:0},
 };
 let cur='p1';
 
-/* BUILD */
 function build(){
-  ['p1','p2'].forEach(p=>{
-    for(let i=0;i<3;i++){
-      G[p].reel[i].top=Math.random()*DIGITS*8;
-      render(p,i);
-    }
-  });
+  ['p1','p2'].forEach(p=>{for(let i=0;i<3;i++){G[p].reel[i].top=Math.random()*DIGITS*8;render(p,i);}});
 }
-
-/* RENDER */
 function render(p,i){
-  const t=G[p].reel[i].top;
-  const base=Math.floor(t),frac=t-base,baseY=frac*CELL;
+  const t=G[p].reel[i].top,base=Math.floor(t),frac=t-base,baseY=frac*CELL;
   const track=document.getElementById('rt-'+p+'-'+i);
   track.innerHTML='';
   for(let k=0;k<5;k++){
-    const off=k-2;
-    const d=((base+off)%DIGITS+DIGITS)%DIGITS;
-    const y=baseY+off*CELL;
+    const off=k-2,d=((base+off)%DIGITS+DIGITS)%DIGITS,y=baseY+off*CELL;
     const e=document.createElement('div');
     e.className='reel-digit';
     e.style.cssText='position:absolute;top:'+y+'px;left:0;width:80px;height:'+CELL+'px;display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;font-size:38px;font-weight:900;color:var(--text);user-select:none;';
-    e.textContent=d;
-    track.appendChild(e);
+    e.textContent=d;track.appendChild(e);
   }
 }
-
-/* TICK */
 function tick(p,i){
   if(!G[p].reel[i].spin)return;
   G[p].reel[i].top+=SPEED;
   if(G[p].reel[i].top>DIGITS*100)G[p].reel[i].top-=DIGITS*10;
-  render(p,i);
-  G[p].reel[i].raf=requestAnimationFrame(()=>tick(p,i));
+  render(p,i);G[p].reel[i].raf=requestAnimationFrame(()=>tick(p,i));
 }
-
-/* STOP ONE */
 function stopOne(p,i){
-  const r=G[p].reel[i];
-  if(!r.spin)return;
-  r.spin=false;
-  cancelAnimationFrame(r.raf);
-  const from=r.top,to=Math.round(from);
-  r.val=((to%DIGITS)+DIGITS)%DIGITS;
+  const r=G[p].reel[i];if(!r.spin)return;
+  r.spin=false;cancelAnimationFrame(r.raf);
+  const from=r.top,to=Math.round(from);r.val=((to%DIGITS)+DIGITS)%DIGITS;
   const dur=260,t0=performance.now();
   function step(now){
-    const prog=Math.min((now-t0)/dur,1);
-    const ease=1-Math.pow(1-prog,3);
-    G[p].reel[i].top=from+(to-from)*ease;
-    render(p,i);
-    if(prog<1){
-      G[p].reel[i].raf=requestAnimationFrame(step);
-    } else {
+    const prog=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-prog,3);
+    G[p].reel[i].top=from+(to-from)*ease;render(p,i);
+    if(prog<1){G[p].reel[i].raf=requestAnimationFrame(step);}
+    else{
       G[p].reel[i].top=to;render(p,i);
       document.getElementById('sd-'+p+'-'+i).classList.add('on');
       document.getElementById('bs-'+p+'-'+i).disabled=true;
-      G[p].stopped++;
-      if(G[p].stopped===3)onDone(p);
+      G[p].stopped++;if(G[p].stopped===3)onDone(p);
     }
   }
   requestAnimationFrame(step);
 }
 function stopAll(p){for(let i=0;i<3;i++)stopOne(p,i);}
-
-/* ALL DONE */
 function onDone(p){
   document.getElementById('bstopall-'+p).disabled=true;
   if(G[p].isFive){
-    const v=G[p].reel[0].val;
-    G[p].reel[1].val=v;G[p].reel[2].val=v;
-    [1,2].forEach(i=>{
-      const base=Math.floor(G[p].reel[i].top);
-      const c=((base%DIGITS)+DIGITS)%DIGITS;
-      const diff=((v-c)+DIGITS)%DIGITS;
-      G[p].reel[i].top=base+diff;
-      render(p,i);
-    });
+    const v=G[p].reel[0].val;G[p].reel[1].val=v;G[p].reel[2].val=v;
+    [1,2].forEach(i=>{const base=Math.floor(G[p].reel[i].top),c=((base%DIGITS)+DIGITS)%DIGITS,diff=((v-c)+DIGITS)%DIGITS;G[p].reel[i].top=base+diff;render(p,i);});
   }
   const v=G[p].reel.map(r=>r.val);
-  const all3=v[0]===v[1]&&v[1]===v[2];
-  const any2=v[0]===v[1]||v[1]===v[2]||v[0]===v[2];
+  const all3=v[0]===v[1]&&v[1]===v[2],any2=v[0]===v[1]||v[1]===v[2]||v[0]===v[2];
   let pts=0,lbl='',cls='';
   if(all3){pts=100;lbl=v.join(' · ')+'  +100 PTS \u2605';cls='w100';}
   else if(any2){pts=50;lbl=v.join(' · ')+'  +50 PTS';cls='w50';}
-  else{pts=0;lbl=v.join(' · ')+'  0 PTS';}
+  else{lbl=v.join(' · ')+'  0 PTS';}
   G[p].pts+=pts;
   document.getElementById('pts-'+p).textContent=G[p].pts;
   document.getElementById('last-'+p).textContent=pts>0?'+'+pts:'0';
   document.getElementById('last-'+p).style.color=pts>0?(p==='p1'?'var(--gold)':'var(--blue)'):'var(--dim)';
   document.getElementById('res-'+p).textContent=lbl;
   document.getElementById('res-'+p).className='result'+(cls?' '+cls:'');
-  const pEl=document.getElementById('pts-'+p);
-  pEl.classList.remove('bump');void pEl.offsetWidth;
+  const pEl=document.getElementById('pts-'+p);pEl.classList.remove('bump');void pEl.offsetWidth;
   if(pts>0){pEl.classList.add('bump');awardEffect(p,pts);}
   if(all3){const w=document.getElementById('wf-'+p);w.classList.remove('go');void w.offsetWidth;w.classList.add('go');}
   updateCashoutBtn(p);
@@ -433,111 +330,79 @@ function onDone(p){
       document.getElementById('bon-'+p).style.color=p==='p1'?'var(--gold)':'var(--blue)';
       document.getElementById('res-'+p).textContent='BONUS! +100 PTS';
       document.getElementById('res-'+p).className='result w100';
-      const pEl2=document.getElementById('pts-'+p);
-      pEl2.classList.remove('bump');void pEl2.offsetWidth;pEl2.classList.add('bump');
-      awardEffect(p,100);
-      for(let i=0;i<5;i++)document.getElementById('d-'+p+'-'+i).classList.remove('on');
-      updateCashoutBtn(p);
-      setTimeout(()=>switchTurn(p),1000);
+      const pEl2=document.getElementById('pts-'+p);pEl2.classList.remove('bump');void pEl2.offsetWidth;pEl2.classList.add('bump');
+      awardEffect(p,100);for(let i=0;i<5;i++)document.getElementById('d-'+p+'-'+i).classList.remove('on');
+      updateCashoutBtn(p);setTimeout(()=>switchTurn(p),1000);
     },600);
-  } else {
-    setTimeout(()=>switchTurn(p),600);
-  }
+  } else {setTimeout(()=>switchTurn(p),600);}
 }
-
-/* CASHOUT BUTTON STATE */
 function updateCashoutBtn(p){
   const btn=document.getElementById('bcash-'+p);
-  if(G[p].pts>100){
-    btn.disabled=false;
-    btn.textContent='CASH OUT  +$10  ('+G[p].pts+' PTS)';
+  if(G[p].pts>CASHOUT_THRESHOLD){
+    btn.disabled=false;btn.textContent='CASH OUT  +$10  ('+G[p].pts+' PTS)';
   } else {
-    btn.disabled=true;
-    btn.textContent='CASH OUT \u2014 NEED 100+ PTS';
+    btn.disabled=true;btn.textContent='CASH OUT \u2014 NEED 99.9+ PTS';
   }
 }
-
-/* CASHOUT */
 function doCashout(p){
-  G[p].cash+=10;
-  G[p].pts=0;
+  G[p].cash+=10;G[p].pts=0;
   document.getElementById('pts-'+p).textContent=0;
   document.getElementById('cash-'+p).textContent='$'+G[p].cash;
   document.getElementById('res-'+p).textContent='CASHED OUT! +$10';
   document.getElementById('res-'+p).className='result w100';
-  const pEl=document.getElementById('pts-'+p);
-  pEl.classList.remove('bump');void pEl.offsetWidth;pEl.classList.add('bump');
+  const pEl=document.getElementById('pts-'+p);pEl.classList.remove('bump');void pEl.offsetWidth;pEl.classList.add('bump');
   awardEffect(p,10);
   const btn=document.getElementById('bcash-'+p);
-  btn.disabled=true;
-  btn.textContent='CASH OUT \u2014 NEED 100+ PTS';
+  btn.disabled=true;btn.textContent='CASH OUT \u2014 NEED 99.9+ PTS';
   btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
   const w=document.getElementById('wf-'+p);w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
 }
-
-/* AWARD EFFECT */
 function awardEffect(p,pts){
   const badge=document.getElementById('badge-'+p);
   document.getElementById('badge-pts-'+p).textContent='+'+pts;
   badge.classList.remove('pop');void badge.offsetWidth;badge.classList.add('pop');
-  const mEl=document.getElementById('machine-'+p);
-  const r=mEl.getBoundingClientRect();
-  const ox=r.right-20,oy=r.top+20;
-  const count=pts>=100?14:pts>=50?9:5;
+  const mEl=document.getElementById('machine-'+p),r=mEl.getBoundingClientRect();
+  const ox=r.right-20,oy=r.top+20,count=pts>=100?14:pts>=50?9:5;
   for(let i=0;i<count;i++){
     setTimeout(()=>{
-      const c=document.createElement('div');
-      const isP1=p==='p1';
+      const c=document.createElement('div'),isP1=p==='p1';
       c.style.cssText='position:fixed;width:26px;height:26px;border-radius:50%;z-index:9999;pointer-events:none;display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;font-size:9px;font-weight:900;'+(isP1?'background:radial-gradient(circle at 35% 35%,#ffe680,#f5c542,#b8850a);color:#5a3a00;box-shadow:0 0 8px rgba(245,197,66,.9);':'background:radial-gradient(circle at 35% 35%,#a8e6ff,#4fc3f7,#0e6a96);color:#003a52;box-shadow:0 0 8px rgba(79,195,247,.9);');
-      c.textContent='$';
-      document.body.appendChild(c);
+      c.textContent='$';document.body.appendChild(c);
       let x=ox+(Math.random()-.5)*14,y=oy+(Math.random()-.5)*14;
-      const angle=Math.random()*Math.PI*2;
-      const spd=2+Math.random()*4;
-      let vx=Math.cos(angle)*spd,vy=Math.sin(angle)*spd-3;
-      const grav=0.18;let rot=0;
-      const spin=(Math.random()-.5)*16;
-      const dur=700+Math.random()*500,t0=performance.now();
+      const angle=Math.random()*Math.PI*2,spd=2+Math.random()*4;
+      let vx=Math.cos(angle)*spd,vy=Math.sin(angle)*spd-3,rot=0;
+      const grav=0.18,spin=(Math.random()-.5)*16,dur=700+Math.random()*500,t0=performance.now();
       function animC(now){
-        const prog=Math.min((now-t0)/dur,1);
-        if(prog>=1){c.remove();return;}
+        const prog=Math.min((now-t0)/dur,1);if(prog>=1){c.remove();return;}
         x+=vx;vy+=grav;y+=vy;rot+=spin;
         const op=prog<0.6?1:1-(prog-0.6)/0.4;
-        c.style.left=(x-13)+'px';c.style.top=(y-13)+'px';
-        c.style.opacity=op;c.style.transform='rotate('+rot+'deg)';
+        c.style.left=(x-13)+'px';c.style.top=(y-13)+'px';c.style.opacity=op;c.style.transform='rotate('+rot+'deg)';
         requestAnimationFrame(animC);
       }
       requestAnimationFrame(animC);
     },i*50);
   }
 }
-
-/* START */
 function doStart(p){
   if(p!==cur)return;
-  G[p].spins++;G[p].stopped=0;
-  G[p].isFive=G[p].spins%5===0;
+  G[p].spins++;G[p].stopped=0;G[p].isFive=G[p].spins%5===0;
   document.getElementById('sp-'+p).textContent=G[p].spins;
-  document.getElementById('last-'+p).textContent='—';
-  document.getElementById('last-'+p).style.color='';
+  document.getElementById('last-'+p).textContent='—';document.getElementById('last-'+p).style.color='';
   for(let i=0;i<3;i++){
     document.getElementById('sd-'+p+'-'+i).classList.remove('on');
     document.getElementById('bs-'+p+'-'+i).disabled=false;
-    G[p].reel[i].top+=3.7+Math.random()*5.3;
-    G[p].reel[i].spin=true;
+    G[p].reel[i].top+=3.7+Math.random()*5.3;G[p].reel[i].spin=true;
     G[p].reel[i].raf=requestAnimationFrame(()=>tick(p,i));
   }
   document.getElementById('bstart-'+p).disabled=true;
   document.getElementById('bstopall-'+p).disabled=false;
   document.getElementById('res-'+p).textContent='SPINNING...';
   document.getElementById('res-'+p).className='result spinning';
-  updateDots(p);
+  const pos=(G[p].spins-1)%5;
+  for(let i=0;i<5;i++)document.getElementById('d-'+p+'-'+i).classList.toggle('on',i<=pos);
 }
-
-/* SWITCH TURN */
 function switchTurn(done){
-  const next=done==='p1'?'p2':'p1';
-  cur=next;
+  const next=done==='p1'?'p2':'p1';cur=next;
   document.getElementById('machine-p1').className='machine p1'+(next==='p1'?' on':' off');
   document.getElementById('machine-p2').className='machine p2'+(next==='p2'?' on':' off');
   document.getElementById('turn-p1').textContent=next==='p1'?'YOUR TURN':'WAITING...';
@@ -546,13 +411,6 @@ function switchTurn(done){
   document.getElementById('bstart-p1').disabled=next!=='p1';
   document.getElementById('bstart-p2').disabled=next!=='p2';
 }
-
-/* DOTS */
-function updateDots(p){
-  const pos=(G[p].spins-1)%5;
-  for(let i=0;i<5;i++)document.getElementById('d-'+p+'-'+i).classList.toggle('on',i<=pos);
-}
-
 build();
 </script>
 </body>
