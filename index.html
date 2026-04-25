@@ -198,19 +198,19 @@
 
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
-    <div class="modal-badge">Every 5 Spins — Bonus Round</div>
-    <div class="modal-title">CHOOSE YOUR BONUS</div>
-    <div class="modal-sub">You've completed 5 spins!<br>Pick an option to continue.</div>
+    <div class="modal-badge">Every 5 Spins &#8212; Bonus Round</div>
+    <div class="modal-title">CLAIM YOUR BONUS</div>
+    <div class="modal-sub">You've completed 5 spins, Player 1!<br>Pick one bonus to add to your score.</div>
     <div class="modal-options">
       <div class="modal-opt" onclick="chooseBonus(1)">
         <div class="opt-num">1</div>
-        <div class="opt-label">Double Down</div>
-        <div class="opt-desc">Next win awards<br>2&times; points</div>
+        <div class="opt-label">Big Reward</div>
+        <div class="opt-desc">Claim instantly<br><span style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--gold);">+100 PTS</span></div>
       </div>
       <div class="modal-opt" onclick="chooseBonus(2)">
         <div class="opt-num">2</div>
-        <div class="opt-label">Safety Net</div>
-        <div class="opt-desc">Next spin can't<br>score zero pts</div>
+        <div class="opt-label">Quick Boost</div>
+        <div class="opt-desc">Claim instantly<br><span style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#aaa;">+50 PTS</span></div>
       </div>
     </div>
   </div>
@@ -225,11 +225,7 @@
     </div>
   </div>
 
-  <div class="rules-bar">
-    <div class="rule-chip gold"><div class="rc-pts">+100 PTS</div><div class="rc-desc">ALL 3 SAME</div></div>
-    <div class="rule-chip silver"><div class="rc-pts">+50 PTS</div><div class="rc-desc">ANY 2 SAME</div></div>
-    <div class="rule-chip zero"><div class="rc-pts">0 PTS</div><div class="rc-desc">ALL UNIQUE</div></div>
-  </div>
+
 
   <div class="reels-container">
     <div class="reel-col">
@@ -480,22 +476,10 @@
       pts = 50; cls = 'win50';
       label = vals.join('  ·  ') + '  —  +50 PTS';
     } else {
-      if (bonusActive === 'safety') {
-        pts = 25; cls = 'win50';
-        label = vals.join('  ·  ') + '  —  +25 PTS (SAFETY NET)';
-      } else {
         pts = 0; cls = 'zero';
         label = vals.join('  ·  ') + '  —  0 PTS';
-      }
     }
 
-    if (bonusActive === 'double' && pts > 0) { pts *= 2; label += '  ×2!'; }
-
-    if (bonusActive) {
-      bonusActive = null;
-      document.getElementById('bonus-status').textContent = '—';
-      document.getElementById('bonus-status').style.color = '';
-    }
 
     totalPoints += pts;
 
@@ -529,9 +513,26 @@
   function chooseBonus(opt) {
     document.getElementById('modal').classList.remove('visible');
     pendingBonus = false;
-    bonusActive  = opt === 1 ? 'double' : 'safety';
-    document.getElementById('bonus-status').textContent = opt === 1 ? '×2' : 'NET';
-    document.getElementById('bonus-status').style.color = 'var(--gold)';
+    bonusActive  = null;
+
+    const bonusPts = opt === 1 ? 100 : 50;
+    totalPoints += bonusPts;
+
+    // Animate points bump
+    const pEl = document.getElementById('pts-value');
+    pEl.textContent = totalPoints;
+    pEl.classList.remove('bump');
+    void pEl.offsetWidth;
+    pEl.classList.add('bump');
+
+    // Show bonus awarded in result strip
+    const res = document.getElementById('result');
+    res.textContent = 'BONUS CLAIMED!  +' + bonusPts + ' PTS';
+    res.className   = 'result-strip win' + (opt === 1 ? '100' : '50');
+
+    document.getElementById('bonus-status').textContent = '+' + bonusPts;
+    document.getElementById('bonus-status').style.color = opt === 1 ? 'var(--gold)' : '#aaa';
+
     document.getElementById('btn-start').disabled = false;
     for (let i = 0; i < 5; i++) document.getElementById('pd' + i).classList.remove('filled');
   }
